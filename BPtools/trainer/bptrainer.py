@@ -10,10 +10,10 @@ from BPtools.core.bpmodule import BPModule
 
 class BPTrainer:
     def __init__(self, *args, **kwargs):
-        self.model = None
+        self.model = kwargs["model"] if "model" in kwargs else args[0]
         self.criterion = None
         self.epochs = None
-        self.losses: Dict = {}
+        self.losses: Dict = {"train": [], "valid": []}
 
     @staticmethod
     def elapsed_time(start_time, end_time):
@@ -22,6 +22,12 @@ class BPTrainer:
         elapsed_secs = int(elapsed_time - (elapsed_mins * 60))
         elapsed_milisecs = int((elapsed_time - elapsed_mins * 60 - elapsed_secs) * 1000)
         return elapsed_mins, elapsed_secs, elapsed_milisecs
+
+    def print(self, epoch, elapsed_time):
+        print('epoch: ', epoch, 'time: ', elapsed_time[0], 'mins', elapsed_time[1], 'secs', elapsed_time[2],
+              'mili secs')
+        print('train loss: ', self.losses["train"][-1])
+        print('valid loss: ', self.losses["valid"][-1])
 
     def fit(
             self,
