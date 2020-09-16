@@ -4,16 +4,21 @@ import torch.optim as optim
 # import numpy
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 
+import BPtools.trainer.bptrainer as bpt
+
 
 class BPModule(nn.Module):
     def __init__(self, *args, **kwargs):
-        super(BPModule).__init__()
+        super(BPModule, self).__init__()
 
         # pointer to the trainer
-        self.trainer = None
+        self.trainer: bpt.BPTrainer = None
 
         # pointer to the logger
         self.logger = None
+
+        # pointer to callable loss nn.Module
+        self.criterion = None
 
     def print(self, *args, **kwargs) -> None:
         print(*args, **kwargs)

@@ -1,8 +1,11 @@
-from BPtools import *
+from BPtools.trainer.bptrainer import BPTrainer
+from BPtools.utils.models import VariationalAutoEncoder, VarDecoderConv1d_3, VarEncoderConv1d
 
-my_model = BPModule()
+encoder = VarEncoderConv1d(2, 60, 10)
+decoder = VarDecoderConv1d_3(2, 60, 10)
+my_model = VariationalAutoEncoder(encoder, decoder)
 data_loader = None  # TODO: dataloader kimásolása a training base-ből a dataloading.py-ba
-Trainer = BPTrainer(model=my_model)
+Trainer = BPTrainer(epochs=10)
 Trainer.fit(model=my_model)
 print(my_model.parameters())
-print(Trainer.model.parameters())
+print(my_model.state_dict())

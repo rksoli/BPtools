@@ -10,10 +10,12 @@ from BPtools.core.bpmodule import BPModule
 
 class BPTrainer:
     def __init__(self, *args, **kwargs):
-        self.model = kwargs["model"] if "model" in kwargs else args[0]
+        self.model: BPModule = None  # kwargs["model"] if "model" in kwargs else args[0]
         self.criterion = None
-        self.epochs = None
+        # self.optim_configuration = None  # nem tudom jó ötlet-e
+        self.epochs: int = kwargs["epochs"] if "epochs" in kwargs else None
         self.losses: Dict = {"train": [], "valid": []}
+        self.dataloaders: Dict = {"train": [], "valid": [], "test": []}
 
     @staticmethod
     def elapsed_time(start_time, end_time):
@@ -38,6 +40,7 @@ class BPTrainer:
         # do the training
         model.trainer = self
         self.model = model
+        self.criterion = model.criterion
         optim_configuration = model.configure_optimizers()
 
         for epoch in range(self.epochs):
@@ -50,3 +53,5 @@ class BPTrainer:
             # TODO: epoch print
 
         self.model.test_step()
+
+

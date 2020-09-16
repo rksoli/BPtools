@@ -3,7 +3,7 @@ from BPtools.core.bpmodule import *
 
 class VariationalAutoEncoder(BPModule):
     def __init__(self, encoder, decoder):
-        super(VariationalAutoEncoder).__init__()
+        super(VariationalAutoEncoder, self).__init__()
         self.encoder = encoder
         self.decoder = decoder
 
@@ -21,22 +21,22 @@ class VariationalAutoEncoder(BPModule):
         pred = self.decoder(z)  # return h
         return pred, mu, logvar, z
 
-    def training_step(self, *args, **kwargs):
-        pass
+    def training_step(self, optim_configuration):
+        self.train()
+        self.optimizer_zero_grad(0, 0, optim_configuration, 0)
+        results = self(self.trainer.dataloaders["train"])
+        loss = self.trainer.criterion(results,)
+
     def validation_step(self, *args, **kwargs):
         pass
+
     def test_step(self, *args, **kwargs):
         pass
+
     def configure_optimizers(self):
-        pass
-    def optimizer_step(
-        self,
-        epoch: int,
-        batch_idx: int,
-        optimizer: optim.Optimizer,
-        optimizer_idx: int,
-    ):
-        pass
+        return optim.Adam(self.parameters())
+
+
 
 
 class VarEncoderConv1d(nn.Module):
