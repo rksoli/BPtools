@@ -39,7 +39,7 @@ class BPTrainer:
     ):
         # do the training
         model.trainer = self
-        self.model = model
+        self.model = model.to("cuda")
         self.criterion = model.criterion
         optim_configuration = model.configure_optimizers()
 

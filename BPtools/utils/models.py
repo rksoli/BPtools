@@ -36,7 +36,25 @@ class VariationalAutoEncoder(BPModule):
     def configure_optimizers(self):
         return optim.Adam(self.parameters())
 
+    def load_data(self, path):
+        data = np.load(path)
+        seq_length = data.shape[3]
+        feature_dim = data.shape[2]
+        data = np.reshape(data, (-1, self.feature_dim, self.seq_length))
+        V = data.shape[0]
 
+        self.trainer.dataloaders["train"] = np.reshape(data[0:int((1 - 2 * self.q) * V)], (-1, self.feature_dim, self.seq_length))
+        self.trainer.dataloaders["test"] = np.reshape(data[int((1 - 2 * self.q) * V):int((1 - self.q) * V)],
+                                    (-1, self.feature_dim, self.seq_length))
+        self.trainer.dataloaders["valid"] = np.reshape(data[int((1 - self.q) * V):], (-1, self.feature_dim, self.seq_length))
+
+        self.trainer.dataloaders["train"] = torch.tensor(self.trainer.dataloaders["train"]).float().to("cuda")
+        self.trainer.dataloaders["test"] = torch.tensor(self.trainer.dataloaders["test"]).float().to("cuda")
+        self.trainer.dataloaders["valid"] = torch.tensor(self.trainer.dataloaders["valid"]).float().to("cuda")
+
+        self.trainer.dataloaders["train"] = self.trainer.dataloaders["train"] - self.trainer.dataloaders["train"][:, :, 0][:, :, None]
+        self.trainer.dataloaders["test"] = self.trainer.dataloaders["test"] - self.trainer.dataloaders["test"][:, :, 0][:, :, None]
+        self.trainer.dataloaders["valid"] = self.trainer.dataloaders["valid"] - self.trainer.dataloaders["valid"][:, :, 0][:, :, None]
 
 
 class VarEncoderConv1d(nn.Module):

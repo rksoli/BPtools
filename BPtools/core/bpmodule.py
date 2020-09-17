@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-# import numpy
+import numpy as np
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 
 import BPtools.trainer.bptrainer as bpt
@@ -25,6 +25,9 @@ class BPModule(nn.Module):
 
     def forward(self, *args):
         return super().forward(*args)
+
+    def load_data(self, path):
+        raise NotImplementedError
 
     def training_step(self, *args, **kwargs):
         """
