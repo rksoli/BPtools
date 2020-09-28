@@ -6,12 +6,17 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 import time
 
 from BPtools.core.bpmodule import BPModule
+from BPtools.trainer.connetcors.model_connector import ModelConnector
 
 
 class BPTrainer:
     def __init__(self, *args, **kwargs):
         self.model: BPModule = None  # kwargs["model"] if "model" in kwargs else args[0]
         self.criterion = None
+
+        # CONNECTORS
+        self.model_connector = ModelConnector(self)
+
         # self.optim_configuration = None  # nem tudom jó ötlet-e
         self.epochs: int = kwargs["epochs"] if "epochs" in kwargs else None
         self.losses: Dict = {"train": [], "valid": []}
@@ -31,6 +36,9 @@ class BPTrainer:
         print('train loss: ', self.losses["train"][-1])
         print('valid loss: ', self.losses["valid"][-1])
 
+    def load_data(self):
+        pass
+
     def fit(
             self,
             model: BPModule,
@@ -38,7 +46,7 @@ class BPTrainer:
             validation_dataloader: Optional[DataLoader] = None
     ):
         # do the training
-        model.trainer = self
+        self.model_connector.connect(model)
         self.model = model.to("cuda")
         self.criterion = model.criterion
         optim_configuration = model.configure_optimizers()

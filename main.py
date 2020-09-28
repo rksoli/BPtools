@@ -9,5 +9,5 @@ data_loader = None  # TODO: dataloader kimásolása a training base-ből a datal
 Trainer = BPTrainer(epochs=10)
 print(isinstance(my_model, BPModule))
 Trainer.fit(model=my_model)
-print(my_model.parameters())
-print(my_model.state_dict())
+# print(my_model.parameters())
+# print(my_model.state_dict())
