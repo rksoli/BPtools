@@ -12,7 +12,9 @@ from BPtools.trainer.connetcors.model_connector import ModelConnector
 class BPTrainer:
     def __init__(self, *args, **kwargs):
         self.model: BPModule = None  # kwargs["model"] if "model" in kwargs else args[0]
-        self.criterion = None
+
+        # pointer to callable loss nn.Module
+        self.criterion = kwargs["criterion"] if "criterion" in kwargs else None
 
         # CONNECTORS
         self.model_connector = ModelConnector(self)
@@ -20,7 +22,7 @@ class BPTrainer:
         # self.optim_configuration = None  # nem tudom jó ötlet-e
         self.epochs: int = kwargs["epochs"] if "epochs" in kwargs else None
         self.losses: Dict = {"train": [], "valid": []}
-        self.dataloaders: Dict = {"train": [], "valid": [], "test": []}
+        self.dataloaders: Dict = {"train": None, "valid": None, "test": None}
 
     @staticmethod
     def elapsed_time(start_time, end_time):
@@ -47,8 +49,9 @@ class BPTrainer:
     ):
         # do the training
         self.model_connector.connect(model)
-        self.model = model.to("cuda")
-        self.criterion = model.criterion
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.model = model.to(device)
+        self.model.load_data("data/X_Yfull_dataset.npy")
         optim_configuration = model.configure_optimizers()
 
         for epoch in range(self.epochs):
@@ -59,6 +62,7 @@ class BPTrainer:
             epoch_time = self.elapsed_time(start_time, end_time)
             # TODO: save model params
             # TODO: epoch print
+            self.print(epoch, epoch_time)
 
         self.model.test_step()
 

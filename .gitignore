@@ -6,5 +6,6 @@ BPtools/core/__pycache__/
 BPtools/trainer/__pycache__/
 BPtools/utils/__pycache__/models.cpython-37.pyc
 */__pycache__/*
+BPtools/utils/__pycache__/__init__.cpython-37.pyc
 BPtools/utils/__pycache__/
 *.pyc
