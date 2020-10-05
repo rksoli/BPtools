@@ -19,16 +19,24 @@ class VariationalAutoEncoder(BPModule):
         mu, logvar = self.encoder(x)
         z = self.sampler(mu, logvar)
         pred = self.decoder(z)  # return h
-        return pred, mu, logvar, z
+        return {"output": pred, "mu": mu, "logvar": logvar}, z
 
     def training_step(self, optim_configuration):
         self.train()
         self.optimizer_zero_grad(0, 0, optim_configuration, 0)
-        results = self(self.trainer.dataloaders["train"])
-        loss = self.trainer.criterion(results,)
+        kwargs, z = self(self.trainer.dataloaders["train"])
+        loss = self.trainer.criterion(**kwargs, target=self.trainer.dataloaders["train"])
+        loss.backward()
+        optim_configuration.step()
+        self.trainer.losses["train"].append(loss.item())
 
     def validation_step(self, *args, **kwargs):
-        pass
+        self.eval()
+        self.freeze()
+        kwargs, z = self(self.trainer.dataloaders["valid"])
+        loss = self.trainer.criterion(**kwargs, target=self.trainer.dataloaders["valid"])
+        self.trainer.losses["valid"].append(loss.item())
+        self.unfreeze()
 
     def test_step(self, *args, **kwargs):
         pass
@@ -40,17 +48,20 @@ class VariationalAutoEncoder(BPModule):
         data = np.load(path)
         seq_length = data.shape[3]
         feature_dim = data.shape[2]
-        data = np.reshape(data, (-1, self.feature_dim, self.seq_length))
+        q = 0.1
+        data = np.reshape(data, (-1, feature_dim, seq_length))
         V = data.shape[0]
 
-        self.trainer.dataloaders["train"] = np.reshape(data[0:int((1 - 2 * self.q) * V)], (-1, self.feature_dim, self.seq_length))
-        self.trainer.dataloaders["test"] = np.reshape(data[int((1 - 2 * self.q) * V):int((1 - self.q) * V)],
-                                    (-1, self.feature_dim, self.seq_length))
-        self.trainer.dataloaders["valid"] = np.reshape(data[int((1 - self.q) * V):], (-1, self.feature_dim, self.seq_length))
+        self.trainer.dataloaders["train"] = np.reshape(data[0:int((1 - 2 * q) * V)], (-1, feature_dim, seq_length))
+        self.trainer.dataloaders["test"] = np.reshape(data[int((1 - 2 * q) * V):int((1 - q) * V)],
+                                    (-1, feature_dim, seq_length))
+        self.trainer.dataloaders["valid"] = np.reshape(data[int((1 - q) * V):], (-1, feature_dim, seq_length))
 
-        self.trainer.dataloaders["train"] = torch.tensor(self.trainer.dataloaders["train"]).float().to("cuda")
-        self.trainer.dataloaders["test"] = torch.tensor(self.trainer.dataloaders["test"]).float().to("cuda")
-        self.trainer.dataloaders["valid"] = torch.tensor(self.trainer.dataloaders["valid"]).float().to("cuda")
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+        self.trainer.dataloaders["train"] = torch.tensor(self.trainer.dataloaders["train"]).float().to(device)
+        self.trainer.dataloaders["test"] = torch.tensor(self.trainer.dataloaders["test"]).float().to(device)
+        self.trainer.dataloaders["valid"] = torch.tensor(self.trainer.dataloaders["valid"]).float().to(device)
 
         self.trainer.dataloaders["train"] = self.trainer.dataloaders["train"] - self.trainer.dataloaders["train"][:, :, 0][:, :, None]
         self.trainer.dataloaders["test"] = self.trainer.dataloaders["test"] - self.trainer.dataloaders["test"][:, :, 0][:, :, None]

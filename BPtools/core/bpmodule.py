@@ -15,9 +15,6 @@ class BPModule(nn.Module):
         # pointer to the logger
         self.logger = None
 
-        # pointer to callable loss nn.Module
-        self.criterion = None
-
     def print(self, *args, **kwargs) -> None:
         print(*args, **kwargs)
 
