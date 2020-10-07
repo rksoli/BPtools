@@ -19,6 +19,9 @@ class BPTrainer:
         # CONNECTORS
         self.model_connector = ModelConnector(self)
 
+        # tensor board writer
+        self.writer = SummaryWriter(logdir='log/losses')
+
         # self.optim_configuration = None  # nem tudom jó ötlet-e
         self.epochs: int = kwargs["epochs"] if "epochs" in kwargs else None
         self.losses: Dict = {"train": [], "valid": []}
@@ -56,8 +59,8 @@ class BPTrainer:
 
         for epoch in range(self.epochs):
             start_time = time.time()
-            self.model.training_step(optim_configuration)
-            self.model.validation_step()
+            self.model.training_step(optim_configuration, epoch)
+            self.model.validation_step(epoch)
             end_time = time.time()
             epoch_time = self.elapsed_time(start_time, end_time)
             # TODO: save model params
@@ -65,5 +68,6 @@ class BPTrainer:
             self.print(epoch, epoch_time)
 
         self.model.test_step()
+        self.writer.close()
 
 
