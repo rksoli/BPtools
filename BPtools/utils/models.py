@@ -29,7 +29,7 @@ class VariationalAutoEncoder(BPModule):
         loss.backward()
         optim_configuration.step()
         self.trainer.losses["train"].append(loss.item())
-        self.trainer.writer.add_scalar('train loss', loss.item(), step)
+        # self.trainer.writer.add_scalar('train loss', loss.item(), step)
 
     def validation_step(self, step):
         self.eval()
@@ -38,7 +38,7 @@ class VariationalAutoEncoder(BPModule):
         loss = self.trainer.criterion(**kwargs, target=self.trainer.dataloaders["valid"])
         self.trainer.losses["valid"].append(loss.item())
         self.unfreeze()
-        self.trainer.writer.add_scalar('valid loss', loss.item(), step)
+        # self.trainer.writer.add_scalar('valid loss', loss.item(), step)
 
     def test_step(self, *args, **kwargs):
         pass

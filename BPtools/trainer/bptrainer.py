@@ -44,6 +44,12 @@ class BPTrainer:
     def load_data(self):
         pass
 
+    def logger(self, step):
+        self.writer.add_scalar('train loss', self.losses["train"][-1], step)
+        self.writer.add_scalar('valid loss', self.losses["valid"][-1], step)
+        self.writer.add_scalars('train and valid losses', {'train': self.losses["train"][-1],
+                                                           'valid': self.losses["valid"][-1]}, step)
+
     def fit(
             self,
             model: BPModule,
@@ -66,6 +72,7 @@ class BPTrainer:
             # TODO: save model params
             # TODO: epoch print
             self.print(epoch, epoch_time)
+            self.logger(epoch)
 
         self.model.test_step()
         self.writer.close()
