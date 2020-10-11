@@ -46,7 +46,7 @@ class VariationalAutoEncoder(BPModule):
     def configure_optimizers(self):
         return optim.Adam(self.parameters())
 
-    def load_data(self, path):
+    def load_data(self, path="data/X_Yfull_dataset.npy"):
         data = np.load(path)
         seq_length = data.shape[3]
         feature_dim = data.shape[2]
