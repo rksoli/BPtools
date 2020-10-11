@@ -10,3 +10,4 @@ BPtools/utils/__pycache__/__init__.cpython-37.pyc
 BPtools/utils/__pycache__/
 *.pyc
 log
+log/

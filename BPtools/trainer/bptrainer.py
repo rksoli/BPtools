@@ -27,6 +27,10 @@ class BPTrainer:
         self.losses: Dict = {"train": [], "valid": []}
         self.dataloaders: Dict = {"train": None, "valid": None, "test": None}
 
+        # bool
+        self.is_data_loaded = False
+
+
     @staticmethod
     def elapsed_time(start_time, end_time):
         elapsed_time = end_time - start_time
@@ -42,7 +46,9 @@ class BPTrainer:
         print('valid loss: ', self.losses["valid"][-1])
 
     def load_data(self):
-        pass
+        if not self.is_data_loaded:
+            self.model.load_data()
+            self.is_data_loaded = True
 
     def logger(self, step):
         self.writer.add_scalar('train loss', self.losses["train"][-1], step)
@@ -50,17 +56,22 @@ class BPTrainer:
         self.writer.add_scalars('train and valid losses', {'train': self.losses["train"][-1],
                                                            'valid': self.losses["valid"][-1]}, step)
 
+    def setup(self):
+        # TODO: setup függvény a fit() beállításához
+        pass
+
     def fit(
             self,
             model: BPModule,
             train_dataloader: Optional[DataLoader] = None,
             validation_dataloader: Optional[DataLoader] = None
     ):
+        self.setup()
         # do the training
         self.model_connector.connect(model)
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = model.to(device)
-        self.model.load_data("data/X_Yfull_dataset.npy")
+        self.model.load_data()
         optim_configuration = model.configure_optimizers()
 
         for epoch in range(self.epochs):
