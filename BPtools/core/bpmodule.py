@@ -21,7 +21,10 @@ class BPModule(nn.Module):
     def forward(self, *args):
         return super().forward(*args)
 
-    def load_data(self, path):
+    def prepare_data(self, **kwargs):
+        raise NotImplementedError
+
+    def setup(self, **kwargs):
         raise NotImplementedError
 
     def training_step(self, *args, **kwargs):
