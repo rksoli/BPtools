@@ -6,7 +6,7 @@ from BPtools.metrics. criterions import CustomLossVAE
 encoder = VarEncoderConv1d(2, 60, 10)
 decoder = VarDecoderConv1d_3(2, 60, 10)
 my_model = VariationalAutoEncoder(encoder, decoder)
-data_loader = None  # TODO: dataloader kimásolása a training base-ből a dataloading.py-ba
+data_loader = None  # TODO: dataloader kimásolása a training base-ből a bpdatamodule.py-ba
 Trainer = BPTrainer(epochs=20000, criterion=CustomLossVAE(0.1, 1.0))
 print(isinstance(my_model, BPModule))
 Trainer.fit(model=my_model)

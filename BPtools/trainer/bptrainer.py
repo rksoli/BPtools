@@ -6,7 +6,9 @@ from tensorboardX import SummaryWriter
 import time
 
 from BPtools.core.bpmodule import BPModule
+from BPtools.core.bpdatamodule import BPDataModule
 from BPtools.trainer.connetcors.model_connector import ModelConnector
+from BPtools.trainer.connetcors.data_connector import DataConnector
 
 
 class BPTrainer:
@@ -18,6 +20,7 @@ class BPTrainer:
 
         # CONNECTORS
         self.model_connector = ModelConnector(self)
+        self.data_conncector = DataConnector(self)
 
         # tensor board writer
         self.writer = SummaryWriter(logdir='log/losses')
