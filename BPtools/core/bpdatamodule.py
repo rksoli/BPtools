@@ -37,9 +37,20 @@ class BPDataModule:
         return self._has_setup_test
 
     def prepare_data(self, *args, **kwargs):
+        """Load and process the dataset
+
+        :param args:
+        :param kwargs:
+        :return:
+        """
         raise NotImplementedError
 
     def setup(self, stage: Optional[str] = None):
+        """split data, send to device, set model internals if there are.
+
+        :param stage: string 'test' 'fit"
+        :return:
+        """
         raise NotImplementedError
 
     def train_dataloader(self, *args, **kwargs) -> Union[DataLoader, Tensor, FloatTensor]:

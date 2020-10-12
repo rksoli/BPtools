@@ -14,6 +14,7 @@ from BPtools.trainer.connetcors.data_connector import DataConnector
 class BPTrainer:
     def __init__(self, *args, **kwargs):
         self.model: BPModule = None  # kwargs["model"] if "model" in kwargs else args[0]
+        self.datamodule: BPDataModule = None
 
         # pointer to callable loss nn.Module
         self.criterion = kwargs["criterion"] if "criterion" in kwargs else None
@@ -32,6 +33,7 @@ class BPTrainer:
 
         # bool
         self.is_data_loaded = False
+        self.is_data_prepared = False
 
 
     @staticmethod
@@ -50,7 +52,7 @@ class BPTrainer:
 
     def load_data(self):
         if not self.is_data_loaded:
-            self.model.load_data()
+            self.model.setup()
             self.is_data_loaded = True
 
     def logger(self, step):
@@ -67,14 +69,19 @@ class BPTrainer:
             self,
             model: BPModule,
             train_dataloader: Optional[DataLoader] = None,
-            validation_dataloader: Optional[DataLoader] = None
+            validation_dataloader: Optional[DataLoader] = None,
+            datamodule: Optional[BPDataModule] = None
     ):
         self.setup()
         # do the training
         self.model_connector.connect(model)
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = model.to(device)
-        self.model.load_data()
+        self.model.setup()
+        #######
+        # DATA CONNECTOR HASZNÁLATA
+        #######
+        self.data_conncector.attach_data(train_dataloader, validation_dataloader, datamodule)
         optim_configuration = model.configure_optimizers()
 
         for epoch in range(self.epochs):
