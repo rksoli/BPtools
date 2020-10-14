@@ -61,9 +61,13 @@ class BPTrainer:
         self.writer.add_scalars('train and valid losses', {'train': self.losses["train"][-1],
                                                            'valid': self.losses["valid"][-1]}, step)
 
-    def setup(self):
+    def setup(self, train_dataloader, validation_dataloader, datamodule):
         # TODO: setup függvény a fit() beállításához
-        pass
+        self.data_conncector.attach_data(train_dataloader, validation_dataloader, datamodule)
+        # self.data_conncector.prepare_data(model=self.model)
+        has_setup = isinstance(self.datamodule, BPDataModule) and self.datamodule.has_setup_fit
+        if not has_setup and self.datamodule is not None:
+            self.datamodule.setup()
 
     def fit(
             self,
@@ -72,16 +76,16 @@ class BPTrainer:
             validation_dataloader: Optional[DataLoader] = None,
             datamodule: Optional[BPDataModule] = None
     ):
-        self.setup()
         # do the training
         self.model_connector.connect(model)
+        self.setup(train_dataloader, validation_dataloader, datamodule)
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = model.to(device)
-        self.model.setup()
+        # self.model.setup()
         #######
         # DATA CONNECTOR HASZNÁLATA
         #######
-        self.data_conncector.attach_data(train_dataloader, validation_dataloader, datamodule)
+        # self.data_conncector.attach_data(train_dataloader, validation_dataloader, datamodule)
         optim_configuration = model.configure_optimizers()
 
         for epoch in range(self.epochs):
