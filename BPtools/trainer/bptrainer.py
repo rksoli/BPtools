@@ -63,7 +63,7 @@ class BPTrainer:
                                                            'valid': self.losses["valid"][-1]}, step)
 
     def setup(self, train_dataloader, validation_dataloader, datamodule):
-        # TODO: setup függvény a fit() beállításához
+        # TODO 3: a model "információk" lekérése
         self.data_conncector.attach_data(train_dataloader, validation_dataloader, datamodule)
         # self.data_conncector.prepare_data(model=self.model)
         has_setup = isinstance(self.datamodule, BPDataModule) and self.datamodule.has_setup_fit
@@ -90,8 +90,7 @@ class BPTrainer:
             self.model.validation_step(epoch)
             end_time = time.time()
             epoch_time = self.elapsed_time(start_time, end_time)
-            # TODO: save model params
-            # TODO: epoch print
+            # TODO 2: save model params
             self.print(epoch, epoch_time)
             self.logger(epoch)
 

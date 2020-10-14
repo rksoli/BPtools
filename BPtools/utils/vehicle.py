@@ -82,7 +82,6 @@ class Trajectories(Dataset):
         self.dataset = dataset
         self.labels = labels
 
-
     def __len__(self):
         """returns with a trajectory sample"""
         return self.dataset.shape[0]
@@ -202,6 +201,10 @@ class VehicleData:
 
     def __getitem__(self, frame_number):
         item = []
+        # TODO 1: kelleni fog, **kwargs segítségével minden féle kérésre (total frame, global time, frame) fel kell
+        #  készíteni.
+        #  Egyéb:
+        
         # returns a numpy array with features corresponding to a specific frame number. The first frame is the zeroth.
         return item
 

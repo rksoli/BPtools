@@ -377,3 +377,29 @@ def preprocess_for_coding(raw_dataset: VehicleDataset, window_size: int) -> Dict
             "dX_Y": dX_Y_traject,
             "X_Y": X_Y_traject,
             "dX_V_A": dX_V_A_traject}
+
+def run():
+    i_80 = '/i-80.csv'
+    us_101 = '/us-101.csv'
+    print(i_80, us_101)
+    raw_dataset_1 = VehicleDataset(us_101)
+    raw_dataset_1.create_vehicle_objects()
+    # print(raw_dataset.vehicle_objects[0].lane_id, raw_dataset.vehicle_objects[1].lane_id)
+    window_size = 60
+    # ha a klasszifikációhoz való preprocess_for_classification függvényt használod, akkor
+    # window_size = 30  # az érdemesebb választés
+
+    shift = 5
+    dict_trajectories_1 = preprocess_for_coding(raw_dataset_1, window_size)
+    raw_dataset_2 = VehicleDataset(i_80)
+    raw_dataset_2.create_vehicle_objects()
+    dict_trajectories_2 = preprocess_for_coding(raw_dataset_2, window_size)
+    for key in dict_trajectories_1:
+        traject = dict_trajectories_1[key] + dict_trajectories_2[key]
+        traject.create_dataset()
+        traject.save_np_dataset_labels(name=key, mode="full")
+        # ha a klasszifikációhoz való preprocess_for_classification függvényt használod, akkor
+        # a mentésnél nem kell a mode="full" :
+        # traject.save_np_dataset_labels(name=key)
+
+        # A kimnentett adat formátuma: M, N, feature, window_size

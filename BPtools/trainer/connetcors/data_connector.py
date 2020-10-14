@@ -3,7 +3,6 @@ from BPtools.core.bpdatamodule import BPDataModule
 
 
 class DataConnector:
-    # TODO: megnézni, hogyan lesz ez működőképes egy DataModul osztállyal
     def __init__(self, trainer):
         self.trainer = trainer
 

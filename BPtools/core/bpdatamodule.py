@@ -36,7 +36,7 @@ class BPDataModule:
         """
         return self._has_setup_test
 
-    # TODO: use setter decorator
+    # TODO 4: use setter decorator
     # @has_prepared_data.setter
     def set_has_prepared_data(self, has: bool):
         self._has_prepared_data = has
