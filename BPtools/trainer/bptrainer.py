@@ -14,7 +14,7 @@ from BPtools.trainer.connetcors.data_connector import DataConnector
 
 class BPTrainer:
     def __init__(self, *args, **kwargs):
-        self.model: BPModule = None  # kwargs["model"] if "model" in kwargs else args[0]
+        self.model: BPModule = None
         self.datamodule: BPDataModule = None
 
         # pointer to callable loss nn.Module
@@ -28,7 +28,7 @@ class BPTrainer:
         self.writer = SummaryWriter(logdir='log/losses')
 
         # self.optim_configuration = None  # nem tudom jó ötlet-e
-        self.epochs: int = kwargs["epochs"] if "epochs" in kwargs else None
+        self.epochs: int = kwargs["epochs"] if "epochs" in kwargs else 100
         self.losses: Dict = {"train": [], "valid": []}
         # TODO 3: Check if dictionay is the best way
         self.dataloaders: Dict = {"train": None, "valid": None, "test": None}
@@ -36,7 +36,6 @@ class BPTrainer:
         # bool
         self.is_data_loaded = False
         self.is_data_prepared = False
-
 
     @staticmethod
     def elapsed_time(start_time, end_time):
@@ -83,11 +82,6 @@ class BPTrainer:
         self.setup(train_dataloader, validation_dataloader, datamodule)
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = model.to(device)
-        # self.model.setup()
-        #######
-        # DATA CONNECTOR HASZNÁLATA
-        #######
-        # self.data_conncector.attach_data(train_dataloader, validation_dataloader, datamodule)
         optim_configuration = model.configure_optimizers()
 
         for epoch in range(self.epochs):

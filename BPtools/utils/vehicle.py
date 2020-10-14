@@ -76,7 +76,7 @@ class Trajectories(Dataset):
         self.window_size = window_size
         self.shift = shift
         self.featnumb = featnumb
-        self.root_dir = common.FULLDATA_PATH
+        self.root_dir = '' # common.FULLDATA_PATH
         self.transform = transform
         self.vehicle_objects = None
         self.dataset = dataset
@@ -239,6 +239,8 @@ class VehicleData:
 class ToDevice(object):
     def __call__(self, sample):
         # print(sample['data'].shape)
+        # TODO 4: device refactor
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         sample = {'data': torch.from_numpy(sample['data'].transpose((1, 0))).float().to(device),
                   'label': torch.from_numpy(sample['label']).to(device=device, dtype=torch.float)}
         return sample
