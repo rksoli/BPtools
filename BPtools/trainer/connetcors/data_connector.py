@@ -28,7 +28,7 @@ class DataConnector:
 
             datamodule.prepare_data()
             datamodule.setup()
-            # TODO: check if pointer is passed. If not, then NoneType is passed to the trainer and must be fixed
+            # TODO 3: check if dictionary is the best for data accessing
             self.trainer.dataloaders = {"train": datamodule.train_dataloader(),
                                         "valid": datamodule.val_dataloader(),
                                         "test": datamodule.test_dataloader()}

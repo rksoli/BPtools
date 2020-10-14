@@ -105,14 +105,15 @@ class VarEncoderConv1d(nn.Module):
         )
         self.linearpremu = nn.Linear(25, self.precontext_dim)
         self.linearprelogvar = nn.Linear(25, self.precontext_dim)
-        self.prelu_mu = nn.PReLU(1)
+        # self.prelu_mu = nn.PReLU(1)
         self.prelu_logvar = nn.PReLU(1)
         self.linear_mu = nn.Linear(self.precontext_dim, self.context_dim)
         self.linear_logvar = nn.Linear(self.precontext_dim, self.context_dim)
 
     def encoder_mu(self, h1):
         mu = self.conv_mu(h1).view(-1, 25)
-        mu = self.prelu_mu(self.linearpremu(mu))
+        # mu = self.prelu_mu(self.linearpremu(mu))
+        mu = self.linearpremu(mu)
         return self.linear_mu(mu)
 
     def encoder_logvar(self, h1):

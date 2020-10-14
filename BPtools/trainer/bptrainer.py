@@ -29,6 +29,7 @@ class BPTrainer:
         # self.optim_configuration = None  # nem tudom jó ötlet-e
         self.epochs: int = kwargs["epochs"] if "epochs" in kwargs else None
         self.losses: Dict = {"train": [], "valid": []}
+        # TODO 3: Check if dictionay is the best way
         self.dataloaders: Dict = {"train": None, "valid": None, "test": None}
 
         # bool
