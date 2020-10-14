@@ -102,12 +102,13 @@ class BPTrainer:
             self.logger(epoch)
 
         self.writer.close()
+        self.save_losses()
 
     def save_losses(self):
         dict = {'epoch': list(range(1, self.epochs + 1))}
         dict.update(self.losses)
         losses = DataFrame(dict)
-        losses.to_csv(self.directory + '/losses.csv', index=False)
-        losses.to_excel(self.directory + '/losses.xlsx', index=False)
+        losses.to_csv('losses.csv', index=False)
+        losses.to_excel('losses.xlsx', index=False)
 
 
