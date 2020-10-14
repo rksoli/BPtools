@@ -4,6 +4,7 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 from tensorboardX import SummaryWriter
 
 import time
+from pandas import DataFrame
 
 from BPtools.core.bpmodule import BPModule
 from BPtools.core.bpdatamodule import BPDataModule
@@ -100,7 +101,13 @@ class BPTrainer:
             self.print(epoch, epoch_time)
             self.logger(epoch)
 
-        self.model.test_step()
         self.writer.close()
+
+    def save_losses(self):
+        dict = {'epoch': list(range(1, self.epochs + 1))}
+        dict.update(self.losses)
+        losses = DataFrame(dict)
+        losses.to_csv(self.directory + '/losses.csv', index=False)
+        losses.to_excel(self.directory + '/losses.xlsx', index=False)
 
 
