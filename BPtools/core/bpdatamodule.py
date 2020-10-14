@@ -1,6 +1,6 @@
 from typing import Any, List, Optional, Tuple, Union
 from torch.utils.data import DataLoader
-from torch import Tensor, FloatTensor
+from torch import Tensor
 
 
 class BPDataModule:
@@ -12,7 +12,7 @@ class BPDataModule:
         self._has_setup_fit = False
         self._has_setup_test = False
 
-    @property
+    # @property
     def has_prepared_data(self):
         """Return bool letting you know if datamodule.prepare_data() has been called or not.
         Returns:
@@ -20,7 +20,7 @@ class BPDataModule:
         """
         return self._has_prepared_data
 
-    @property
+    # @property
     def has_setup_fit(self):
         """Return bool letting you know if datamodule.setup('fit') has been called or not.
         Returns:
@@ -28,13 +28,26 @@ class BPDataModule:
         """
         return self._has_setup_fit
 
-    @property
+    # @property
     def has_setup_test(self):
         """Return bool letting you know if datamodule.setup('test') has been called or not.
         Returns:
             bool: True if datamodule.setup('test') has been called. False by default.
         """
         return self._has_setup_test
+
+    # TODO: use setter decorator
+    # @has_prepared_data.setter
+    def set_has_prepared_data(self, has: bool):
+        self._has_prepared_data = has
+
+    # @has_setup_fit.setter
+    def set_has_setup_fit(self, has: bool):
+        self._has_setup_fit = has
+
+    # @has_setup_test.setter
+    def set_has_setup_test(self, has: bool):
+        self._has_setup_test = has
 
     def prepare_data(self, *args, **kwargs):
         """Load and process the dataset
@@ -53,11 +66,11 @@ class BPDataModule:
         """
         raise NotImplementedError
 
-    def train_dataloader(self, *args, **kwargs) -> Union[DataLoader, Tensor, FloatTensor]:
+    def train_dataloader(self, *args, **kwargs) -> Union[DataLoader, Tensor]:
         raise NotImplementedError
 
-    def val_dataloader(self, *args, **kwargs) -> Union[DataLoader, List[DataLoader], Tensor, FloatTensor]:
+    def val_dataloader(self, *args, **kwargs) -> Union[DataLoader, List[DataLoader], Tensor]:
         raise NotImplementedError
 
-    def test_dataloader(self, *args, **kwargs) -> Union[DataLoader, List[DataLoader], Tensor, FloatTensor]:
+    def test_dataloader(self, *args, **kwargs) -> Union[DataLoader, List[DataLoader], Tensor]:
         raise NotImplementedError

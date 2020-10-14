@@ -1,4 +1,5 @@
 from BPtools.core.bpmodule import *
+from BPtools.core.bpdatamodule import *
 
 
 class VariationalAutoEncoder(BPModule):
@@ -45,6 +46,9 @@ class VariationalAutoEncoder(BPModule):
 
     def configure_optimizers(self):
         return optim.Adam(self.parameters())
+
+    def prepare_data(self, **kwargs):
+        self.setup()
 
     def setup(self, path="data/X_Yfull_dataset.npy"):
         data = np.load(path)
@@ -152,3 +156,57 @@ class VarDecoderConv1d_3(nn.Module):
 
     def forward(self, x):
         return self.decoder1(self.linear(x.unsqueeze(1)))
+
+
+class VAEDataModul(BPDataModule):
+    def __init__(self, path, split_ratio):
+        super(VAEDataModul).__init__()
+        self.path = path
+        self.seq_length = None
+        self.feature_dim = None
+        self.data = None
+        self.split_ratio = split_ratio
+        self.ngsim_train = None
+        self.ngsim_test = None
+        self.ngsim_val = None
+
+    def prepare_data(self, *args, **kwargs):
+        data = np.load(self.path)
+        self.seq_length = data.shape[3]
+        self.feature_dim = data.shape[2]
+        q = 0.1
+        self.data = np.reshape(data, (-1, self.feature_dim, self.seq_length))
+        self.set_has_prepared_data(True)
+
+    def setup(self, stage: Optional[str] = None):
+        V = self.data.shape[0]
+        feature_dim = self.feature_dim
+        seq_length = self.seq_length
+        q = self.split_ratio
+
+        self.ngsim_train = np.reshape(self.data[0:int((1 - 2 * q) * V)], (-1, feature_dim, seq_length))
+        self.ngsim_test = np.reshape(self.data[int((1 - 2 * q) * V):int((1 - q) * V)],
+                                                      (-1, feature_dim, seq_length))
+        self.ngsim_val = np.reshape(self.data[int((1 - q) * V):], (-1, feature_dim, seq_length))
+
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+        self.ngsim_train = torch.tensor(self.ngsim_train).float().to(device)
+        self.ngsim_test = torch.tensor(self.ngsim_test).float().to(device)
+        self.ngsim_val = torch.tensor(self.ngsim_val).float().to(device)
+
+        self.ngsim_train = self.ngsim_train - self.ngsim_train[:, :, 0][:, :, None]
+        self.ngsim_test = self.ngsim_test - self.ngsim_test[:, :, 0][:, :, None]
+        self.ngsim_val = self.ngsim_val - self.ngsim_val[:, :, 0][:, :, None]
+        self.set_has_setup_test(True)
+        self.set_has_setup_fit(True)
+
+    def train_dataloader(self, *args, **kwargs):
+        # return DataLoader(self.ngsim_train, batch_size=self.ngsim_train.shape[0])
+        return self.ngsim_train
+
+    def val_dataloader(self, *args, **kwargs):
+        return self.ngsim_val
+
+    def test_dataloader(self, *args, **kwargs):
+        return self.ngsim_test

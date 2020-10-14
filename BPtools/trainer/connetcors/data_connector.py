@@ -10,16 +10,25 @@ class DataConnector:
     def connect(self, **kwargs):
         pass
 
-    def prepare_data(self, model):
+    def prepare_data(self, model=None):
         if self.trainer.datamodule is not None:
             self.trainer.datamodule.prepare_data()
-        model.prepare_data()
+        elif model is not None:
+            model.prepare_data()
+            self.trainer.is_data_loaded = True
+        else:
+            Exception('You did not pass a model or a datamodule therefore data preparation is failed')
         self.trainer.is_data_prepared = True
 
     def attach_datamodule(self, datamodule: Optional[BPDataModule]) -> None:
-        if datamodule:
+        if datamodule is not None:
+            # connect trainer to datamodule
             self.trainer.datamodule = datamodule
             datamodule.trainer = self.trainer
+
+            datamodule.prepare_data()
+            datamodule.setup()
+            # TODO: check if pointer is passed. If not, then NoneType is passed to the trainer and must be fixed
             self.trainer.dataloaders = {"train": datamodule.train_dataloader(),
                                         "valid": datamodule.val_dataloader(),
                                         "test": datamodule.test_dataloader()}
@@ -45,5 +54,5 @@ class DataConnector:
             self.trainer.dataloaders["valid"] = train_dataloader
         if test_dataloader is not None:
             self.trainer.dataloaders["test"] = train_dataloader
-        if None not in (train_dataloader, val_dataloader, test_dataloader):
+        if None not in (train_dataloader, val_dataloader):
             self.trainer.is_data_loaded = True
