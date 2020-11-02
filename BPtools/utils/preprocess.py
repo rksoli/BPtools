@@ -5,6 +5,7 @@ import pandas as pd
 from BPtools.utils.vehicle import *
 from typing import Dict
 
+
 def preprocess_for_classification(raw_dataset: VehicleDataset, window_size: int, shift: int) -> Dict[str, Trajectories]:
 
     """
@@ -377,6 +378,7 @@ def preprocess_for_coding(raw_dataset: VehicleDataset, window_size: int) -> Dict
             "dX_Y": dX_Y_traject,
             "X_Y": X_Y_traject,
             "dX_V_A": dX_V_A_traject}
+
 
 def run():
     i_80 = '/i-80.csv'

@@ -53,12 +53,16 @@ class VehicleDataset(Dataset):
         self.vehicle_objects = vehicle_objects
 
     def create_vehicle_objects(self):
+        if self.vehicle_objects is not None:
+            print("Vehicle objects are already generated")
+            return
         vehicle_objects = []
         for _, vehicle_id in self.all_data.groupby('Vehicle_ID'):
             for _, vehicle_id_tf in vehicle_id.groupby('Total_Frames'):
                 vehicle = VehicleData(np.array(vehicle_id_tf))
                 vehicle_objects.append(vehicle)
         self.vehicle_objects = vehicle_objects
+        print("Vehicle objects are generated")
 
 
 class Trajectories(Dataset):
@@ -204,7 +208,7 @@ class VehicleData:
         # TODO 1: kelleni fog, **kwargs segítségével minden féle kérésre (total frame, global time, frame) fel kell
         #  készíteni.
         #  Egyéb:
-        
+
         # returns a numpy array with features corresponding to a specific frame number. The first frame is the zeroth.
         return item
 
