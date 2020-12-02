@@ -3,9 +3,9 @@ import torch
 from torch.nn import functional as F
 
 
-class CustomLossVAE(nn.Module):
+class KLD_MSE_loss_variational_autoencoder(nn.Module):
     def __init__(self, weight, lam):
-        super(CustomLossVAE, self).__init__()
+        super(KLD_MSE_loss_variational_autoencoder, self).__init__()
         self.weight = weight
         self.lam = lam
 

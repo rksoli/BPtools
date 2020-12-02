@@ -26,6 +26,7 @@ class VehicleDataset(Dataset):
         self.root_dir = root_dir
         self.transform = transform
         self.vehicle_objects = None
+        self.vehicle_id_list = None
         self.left_iter = None
         self.right_iter = None
         self.keep_iter = None
@@ -57,11 +58,16 @@ class VehicleDataset(Dataset):
             print("Vehicle objects are already generated")
             return
         vehicle_objects = []
+        vehicle_id_list = []
+        total_frame_list = []
         for _, vehicle_id in self.all_data.groupby('Vehicle_ID'):
             for _, vehicle_id_tf in vehicle_id.groupby('Total_Frames'):
                 vehicle = VehicleData(np.array(vehicle_id_tf))
                 vehicle_objects.append(vehicle)
+                vehicle_id_list.append(vehicle.id)
+                total_frame_list.append(vehicle.size)
         self.vehicle_objects = vehicle_objects
+        self.vehicle_id_list = vehicle_id_list
         print("Vehicle objects are generated")
 
 
