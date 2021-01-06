@@ -1,15 +1,15 @@
 import torch
 from torch.utils.data import Dataset, DataLoader, TensorDataset
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
-from tensorboardX import SummaryWriter
-
+# from tensorboardX import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
 import time
 from pandas import DataFrame
 
 from BPtools.core.bpmodule import BPModule
 from BPtools.core.bpdatamodule import BPDataModule
-from BPtools.trainer.connetcors.model_connector import ModelConnector
-from BPtools.trainer.connetcors.data_connector import DataConnector
+from BPtools.trainer.connectors.model_connector import ModelConnector
+from BPtools.trainer.connectors.data_connector import DataConnector
 
 
 class BPTrainer:
@@ -25,7 +25,7 @@ class BPTrainer:
         self.data_conncector = DataConnector(self)
 
         # tensor board writer
-        self.writer = SummaryWriter(logdir='log/losses')
+        self.writer = SummaryWriter('log/losses')
 
         # self.optim_configuration = None  # nem tudom jó ötlet-e
         self.epochs: int = kwargs["epochs"] if "epochs" in kwargs else 100
@@ -48,8 +48,8 @@ class BPTrainer:
     def print(self, epoch, elapsed_time):
         print('epoch: ', epoch, 'time: ', elapsed_time[0], 'mins', elapsed_time[1], 'secs', elapsed_time[2],
               'mili secs')
-        print('train loss: ', self.losses["train"][-1])
-        print('valid loss: ', self.losses["valid"][-1])
+        for key in self.losses.keys():
+            print(key + ' :', round(self.losses[key][-1], 4))
 
     def load_data(self):
         if not self.is_data_loaded:
@@ -57,10 +57,14 @@ class BPTrainer:
             self.is_data_loaded = True
 
     def logger(self, step):
+        # Todo: ha megy rendesen, akkor végig iterálni a losses dictionaryn és kész
         self.writer.add_scalar('train loss', self.losses["train"][-1], step)
         self.writer.add_scalar('valid loss', self.losses["valid"][-1], step)
         self.writer.add_scalars('train and valid losses', {'train': self.losses["train"][-1],
                                                            'valid': self.losses["valid"][-1]}, step)
+        for key in self.losses.keys():
+            if key not in ["train", "valid"]:
+                self.writer.add_scalar(key, self.losses[key][-1], step)
 
     def setup(self, train_dataloader, validation_dataloader, datamodule):
         # TODO 3: a model "információk" lekérése
@@ -81,6 +85,7 @@ class BPTrainer:
         self.model_connector.connect(model)
         self.setup(train_dataloader, validation_dataloader, datamodule)
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        print('device: ', device)
         self.model = model.to(device)
         optim_configuration = model.configure_optimizers()
 

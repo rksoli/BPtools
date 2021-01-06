@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
+import PIL.Image
 
 
 class BPModule(nn.Module):
@@ -14,6 +15,8 @@ class BPModule(nn.Module):
 
         # pointer to the logger
         self.logger = None
+
+        self.losses_keys = None
 
     def print(self, *args, **kwargs) -> None:
         print(*args, **kwargs)
@@ -120,7 +123,7 @@ class BPModule(nn.Module):
                             optimizer.zero_grad()
         """
 
-    def optimizer_zero_grad(self, epoch: int, batch_idx: int, optimizer: optim.Optimizer, optimizer_idx: int):
+    def optimizer_zero_grad(self, epoch: int, batch_idx: int, optimizer: Union[optim.Optimizer, List], optimizer_idx: int):
         optimizer.zero_grad()
 
     def freeze(self) -> None:

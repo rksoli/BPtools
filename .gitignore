@@ -11,3 +11,8 @@ BPtools/utils/__pycache__/
 *.pyc
 log
 log/
+build/
+*.csv
+*.xlsx
+*.pt
+

@@ -6,7 +6,6 @@ from torch import Tensor
 class BPDataModule:
     def __init__(self):
         self.trainer = None
-
         # Private attrs to keep track of whether or not data hooks have been called yet
         self._has_prepared_data = False
         self._has_setup_fit = False
