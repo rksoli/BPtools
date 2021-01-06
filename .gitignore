@@ -15,7 +15,7 @@ build/
 *.csv
 *.xlsx
 *.pt
-log_scheduler/
-log2/
+#log_scheduler/
+#log2/
 data/
 
