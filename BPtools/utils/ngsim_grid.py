@@ -1,6 +1,7 @@
 from BPtools.utils.vehicle import *
 from typing import Any, List, Optional, Tuple, Union
 import pandas as pd
+# import modin.pandas as pd
 from sodapy import Socrata
 from PIL import Image
 from matplotlib import cm
@@ -83,10 +84,75 @@ class OccupancyGrid:
                     im = Image.fromarray(np.uint8(cm.gist_earth(pic_array) * 255))
                     im.save(str(f_id) + ".png")
 
+    def grid_data_for_ae(self, size=(32, 256)):
+        self.data["Time_Start"] = self.data["Global_Time"] / 100 - self.data["Frame_ID"] - 1.11343e+10
+        # Konvenció: az origó a közepétől eggyel jobbra és feljebb index
+        origo = (size[0]//2 + 1, size[1]//2 + 1)
+        for T, group_time_start in self.data.groupby("Time_Start"):
+            print("T: ", T)
+            data_T = []
+            i = 1
+            for ego_v_ID, group_ego_vehicles in group_time_start.groupby("Vehicle_ID"):
+                data_ego = []
+                ego = VehicleData(np.array(group_ego_vehicles))
+                print("\tEgo ID: ", ego_v_ID)
+                print("\tframes: ", ego.size)
+                for f_id, group_frame in group_time_start.groupby("Frame_ID"):
+                    neighbourhood = np.zeros(size,dtype=np.uint8)
+                    # EGO
+                    # Ego pozíciója f_id-ben
+                    x_ego_f_id = ego[("Local_X", f_id)]
+                    y_ego_f_id = ego[("Local_Y", f_id)]
+                    if not x_ego_f_id:
+                        # ha nincs benne az ego ebben az f_id-ben - azaz f_id nem része az egonak, akkor
+                        # False a visszatérési érték a __getitem__ függvénynek
+                        # ugrás a következő f_id-re
+                        continue
+                    # Ego  (L,W)
+                    ego_dims = ego[("v_dims", f_id)]
+                    # Ego berakása
+                    x_1 = origo[0] - int(0.5 * ego_dims[1] / self.deltaX)
+                    x_2 = origo[0] + int(0.5 * ego_dims[1] / self.deltaX)
+                    y_1 = origo[1]
+                    y_2 = origo[1] + int(ego_dims[0] / self.deltaY)
+                    neighbourhood[x_1:x_2, y_1:y_2] = 1
+                    for v_ID, group_vehicles in group_frame.groupby("Vehicle_ID"):
+                        if v_ID == ego_v_ID:
+                            # nem kell még egyszer berakni az egot
+                            # Bár azt is meg lehet csinálni hogy itt teszem bele általánosan.
+                            continue
+                        v = VehicleData(np.array(group_vehicles))
+                        x_v_f_id = v[("Local_X", f_id)]
+                        y_v_f_id = v[("Local_Y", f_id)]
+                        v_dims = ego[("v_dims", f_id)]
+                        # Ego koordinátarendszerben
+                        x_v_f_id = x_v_f_id - x_ego_f_id
+                        y_v_f_id = y_v_f_id - y_ego_f_id
+                        x_1 = int(x_v_f_id // self.deltaX) + origo[0] - int(0.5 * v_dims[1] / self.deltaX)
+                        x_2 = int(x_v_f_id // self.deltaX) + origo[0] + int(0.5 * v_dims[1] / self.deltaX)
+                        y_1 = int(y_v_f_id // self.deltaX) + origo[1]
+                        y_2 = int(y_v_f_id // self.deltaX) + origo[1] + int(v_dims[0] / self.deltaY)
+                        if x_1<0 or x_2 >= size[0] or y_1<0 or y_2>=size[1]:
+                            continue
+                        neighbourhood[x_1:x_2, y_1:y_2] = 1
 
-        print(5)
+                    # Egy adott ego_v_ID-hez és f_id-hez tartozó grid elkészült
+                    # Show
 
+                    data_ego.append(neighbourhood)
+                    # im = Image.fromarray(np.uint8(cm.gist_earth(neighbourhood) * 255))
+                    # im.save("ego_" + str(ego_v_ID) + "_f_" + str(f_id) + ".png")
+                data_T.append(data_ego)
+                print("\tVehicles: ", len(data_T))
 
+                if len(data_T) == 100:
+                    np.save(str(T) + '_' + str(i), np.array(data_T))
+                    data_T = []
+                    i = i + 1
+                # ha nem érte el a 100-at, ki kéne még menteni
+            # maradék data_T kimentése, ha van
+            if len(data_T) > 0:
+                np.save(str(T) + '_' + str(i), np.array(data_T))
 
 
 if __name__ == "__main__":
@@ -103,4 +169,4 @@ if __name__ == "__main__":
     # results_df = pd.DataFrame.from_records(results)
     # print(results_df.head())
     grid = OccupancyGrid(csv_file_name='../../../full_data/i-80.csv', deltaX=0.5, deltaY=0.5)
-    grid.grid_prepare()
+    grid.grid_data_for_ae()

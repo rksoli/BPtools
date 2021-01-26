@@ -25,11 +25,14 @@ class BPTrainer:
         self.data_conncector = DataConnector(self)
 
         # tensor board writer
-        self.writer = SummaryWriter('log/losses')
+        name = kwargs["name"] if "name" in kwargs else ''
+        self.name = name
+        self.writer = SummaryWriter('log_' + name + '/losses')
 
         # self.optim_configuration = None  # nem tudom jó ötlet-e
         self.epochs: int = kwargs["epochs"] if "epochs" in kwargs else 100
         self.losses: Dict = {"train": [], "valid": []}
+        self.min_loss = float("inf")
         # TODO 3: Check if dictionay is the best way
         self.dataloaders: Dict = {"train": None, "valid": None, "test": None}
 
@@ -65,6 +68,10 @@ class BPTrainer:
         for key in self.losses.keys():
             if key not in ["train", "valid"]:
                 self.writer.add_scalar(key, self.losses[key][-1], step)
+
+        if self.losses["valid"][-1] < self.min_loss:
+            self.min_loss = self.losses["valid"][-1]
+            torch.save(self.model.state_dict(), 'log_' + self.name + "/model_state_dict_" + self.name)
 
     def setup(self, train_dataloader, validation_dataloader, datamodule):
         # TODO 3: a model "információk" lekérése

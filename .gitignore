@@ -16,6 +16,10 @@ build/
 *.xlsx
 *.pt
 #log_scheduler/
-#log2/
+log2/
 data/
+*.png
+log*/
+model_parameters.pt*
+*.npy
 

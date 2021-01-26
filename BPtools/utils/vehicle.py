@@ -176,6 +176,7 @@ class Trajectories(Dataset):
 class VehicleData:
 
     def __init__(self, data):
+        #todo: megcsinálni hogy ne np.array hanem pd DataFrame jöjjön be. Sokkal egyszerűbb
         # car ID
         self.id = int(data[0, 0])
         # frame ID
@@ -209,14 +210,24 @@ class VehicleData:
 
         self.indicator = None
 
-    def __getitem__(self, frame_number):
-        item = []
-        # TODO 1: kelleni fog, **kwargs segítségével minden féle kérésre (total frame, global time, frame) fel kell
-        #  készíteni.
-        #  Egyéb:
+    def __getitem__(self, arg):
+        var, frame_id = arg
+        index = frame_id - self.frames[0]
+        if var == "Frame_ID":
+            return frame_id in self.frames
+        if not frame_id in self.frames:
+            return False
 
-        # returns a numpy array with features corresponding to a specific frame number. The first frame is the zeroth.
-        return item
+        if var == "Local_X":
+            return self.x[index]
+        if var == "Local_Y":
+            return self.y[index]
+        if var == "v_Width":
+            return self.dims[1]
+        if var == "v_length":
+            return self.dims[0]
+        if var == "v_dims":
+            return self.dims
 
     def set_change_lane(self, l_change):
         self.change_lane = l_change

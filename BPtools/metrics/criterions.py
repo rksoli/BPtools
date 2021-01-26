@@ -25,3 +25,16 @@ class KLD_MSE_loss_variational_autoencoder(nn.Module):
 
     def __str__(self):
         return self._get_name() + " weight: " + str(self.weight) + " Lambda: " + str(self.lam)
+
+
+class KLD_BCE_loss_2Dvae(nn.Module):
+    def __init__(self, lam):
+        super(KLD_BCE_loss_2Dvae, self).__init__()
+        self.lam = lam
+        self.bce = nn.BCELoss()
+
+    def forward(self, output, mu, logvar, target):
+        loss = self.bce(output, target)
+        KL = mu.pow(2).add_(logvar.exp()).mul_(-1).add_(1).add_(logvar)
+        KLD = self.lam * torch.mean(KL).mul_(-0.5)
+        return loss + KLD
