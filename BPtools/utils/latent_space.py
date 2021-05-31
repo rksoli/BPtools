@@ -4,6 +4,9 @@ import io
 from matplotlib.offsetbox import AnnotationBbox
 from sklearn import manifold
 import torch
+from PIL import Image
+from matplotlib import cm
+
 
 
 class myBhattacharyya():
@@ -50,21 +53,39 @@ def imscatter(x, y, ax, Data, zoom=None):
         # img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
         # Note: OpenCV uses BGR and plt uses RGB
         # image = OffsetImage(img, zoom=zoom)  # nemkell
-        data_y = [t[0] for t in Data[i]]
-        data_x = [t[1] for t in Data[i]]
+        im = Image.fromarray(np.uint8(cm.gist_earth(Data[i]) * 255))
         image = plt.figure()
-        plt.plot(data_y, data_x)
+        plt.plot(im)
         # canvas = FigureCanvas(image)
         # canvas.draw()
-        X = fig2data(image)
+        # X = fig2data(image)
         # grab the pixel buffer and dump it into a numpy array
         # X = np.array(canvas.renderer.buffer_rgba())
 
-        ab = AnnotationBbox(X, (x0, y0), xycoords='data', frameon=False)
+        ab = AnnotationBbox(image, (x0, y0), xycoords='data', frameon=False)
         images.append(ax.add_artist(ab))
 
     ax.update_datalim(np.column_stack([x, y]))
     ax.autoscale()
+
+
+def plot_latent_interpolation(mu1, mu2, decoder, n_inter):
+    f, interpol = plt.subplots(n_inter + 2, 1, sharex='all', sharey='all')
+
+    reconstruction = decoder(mu1).to("cpu").detach().numpy()
+    img = Image.fromarray(np.uint8(cm.gist_earth(reconstruction) * 255))
+    interpol[0].plot(img)
+
+    for n in range(1, n_inter+1):
+        mu_n = (n * mu2 + (n_inter - n + 1) * mu1) / (n_inter + 1)
+        reconstruction_n = decoder(mu_n).to("cpu").detach().numpy()
+        img_n = Image.fromarray(np.uint8(cm.gist_earth(reconstruction_n) * 255))
+        interpol[n].plot(img)
+
+    reconstruction = decoder(mu2).to("cpu").detach().numpy()
+    img = Image.fromarray(np.uint8(cm.gist_earth(reconstruction) * 255))
+    interpol[n_inter + 1].plot(img)
+    plt.show()
 
 
 def fig2data(fig):

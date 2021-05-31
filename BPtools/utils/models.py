@@ -297,6 +297,7 @@ class VAE(nn.Module):
     def sampler(self, mu, logvar):
         std = logvar.mul(0.5).exp_()
         eps = torch.FloatTensor(std.size()).normal_().to(std.device)
+        # kipróbáljuk, milyen lesz a tanulás, ha nem mintavételezünk.
         return eps.mul(std).add_(mu)
 
     def forward(self, x):
@@ -320,6 +321,7 @@ class AdvAE(BPModule):
     def sampler(self, mu, logvar):
         std = logvar.mul(0.5).exp_()
         eps = torch.FloatTensor(std.size()).normal_().to(std.device)
+        # kipróbáljuk, milyen lesz a tanulás, ha nem mintavételezünk.
         return eps.mul(std).add_(mu)
 
     def forward(self, x):
@@ -335,6 +337,10 @@ class AdvAE(BPModule):
         # mu, logvar = self.encoder(self.trainer.dataloaders["train"])
         # z = self.sampler(mu, logvar)
         z_real = torch.FloatTensor(z.size()).normal_().to(z.device)
+        # itt még hozzáadok 2 normális eloszlást
+        # z_real += torch.FloatTensor(z.size()).normal_(torch.tensor(3.0),torch.tensor(1.0)).to(z.device)
+        # z_real += torch.FloatTensor(z.size()).normal_(torch.tensor(-3.0),torch.tensor(1.0)).to(z.device)
+
         d_real = self.disc(z_real)
         d_fake = self.disc(z)
 
@@ -390,6 +396,10 @@ class AdvAE(BPModule):
 
         # Disc
         z_real = torch.FloatTensor(z.size()).normal_().to(z.device)
+        # itt még hozzáadok 2 normális eloszlást
+        # z_real += torch.FloatTensor(z.size()).normal_(3, 1).to(z.device)
+        # z_real += torch.FloatTensor(z.size()).normal_(-3, 1).to(z.device)
+
         d_real = self.disc(z_real)
         d_fake = self.disc(z)
         loss_real = self.bce(d_real, torch.ones_like(d_real))
