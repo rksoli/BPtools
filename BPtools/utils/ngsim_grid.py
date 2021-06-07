@@ -2,7 +2,7 @@ from BPtools.utils.vehicle import *
 from typing import Any, List, Optional, Tuple, Union
 import pandas as pd
 # import modin.pandas as pd
-from sodapy import Socrata
+# from sodapy import Socrata
 from PIL import Image
 from matplotlib import cm
 
@@ -78,7 +78,7 @@ class OccupancyGrid:
                     x_1 = int(X - 0.5 * vehicle["v_Width"] / self.deltaX)
                     y_1 = int(Y)
                     x_2 = int(X + 0.5 * vehicle["v_Width"] / self.deltaX)
-                    y_2 = int(Y + vehicle["v_length"]//self.deltaY)
+                    y_2 = int(Y + vehicle["v_length"] // self.deltaY)
                     pic_array[x_1:x_2, y_1:y_2] = 1.0
                 if f_id > 100:
                     im = Image.fromarray(np.uint8(cm.gist_earth(pic_array) * 255))
@@ -87,18 +87,24 @@ class OccupancyGrid:
     def grid_data_for_ae(self, size=(32, 256)):
         self.data["Time_Start"] = self.data["Global_Time"] / 100 - self.data["Frame_ID"] - 1.11343e+10
         # Konvenció: az origó a közepétől eggyel jobbra és feljebb index
-        origo = (size[0]//2 + 1, size[1]//2 + 1)
+        origo = (size[0] // 2 + 1, size[1] // 2 + 1)
+        # idősor csoportosítás kezdő időpont szerint.
         for T, group_time_start in self.data.groupby("Time_Start"):
             print("T: ", T)
             data_T = []
             i = 1
+
+            # adott idősor csoportosítás: ego járművek
             for ego_v_ID, group_ego_vehicles in group_time_start.groupby("Vehicle_ID"):
                 data_ego = []
                 ego = VehicleData(np.array(group_ego_vehicles))
+                # Todo(Data): itt az ego-ból kellene kinyerni a trajektóriát
                 print("\tEgo ID: ", ego_v_ID)
                 print("\tframes: ", ego.size)
+
+                # adott idősor csoportosítás: frame ID szerint
                 for f_id, group_frame in group_time_start.groupby("Frame_ID"):
-                    neighbourhood = np.zeros(size,dtype=np.uint8)
+                    neighbourhood = np.zeros(size, dtype=np.uint8)
                     # EGO
                     # Ego pozíciója f_id-ben
                     x_ego_f_id = ego[("Local_X", f_id)]
@@ -108,19 +114,24 @@ class OccupancyGrid:
                         # False a visszatérési érték a __getitem__ függvénynek
                         # ugrás a következő f_id-re
                         continue
+
                     # Ego  (L,W)
                     ego_dims = ego[("v_dims", f_id)]
+
                     # Ego berakása
                     x_1 = origo[0] - int(0.5 * ego_dims[1] / self.deltaX)
                     x_2 = origo[0] + int(0.5 * ego_dims[1] / self.deltaX)
                     y_1 = origo[1]
                     y_2 = origo[1] + int(ego_dims[0] / self.deltaY)
                     neighbourhood[x_1:x_2, y_1:y_2] = 1
+
+                    # a frameben található járművek csoportosítása (szomszédság)
                     for v_ID, group_vehicles in group_frame.groupby("Vehicle_ID"):
                         if v_ID == ego_v_ID:
                             # nem kell még egyszer berakni az egot
                             # Bár azt is meg lehet csinálni hogy itt teszem bele általánosan.
                             continue
+
                         v = VehicleData(np.array(group_vehicles))
                         x_v_f_id = v[("Local_X", f_id)]
                         y_v_f_id = v[("Local_Y", f_id)]
@@ -132,7 +143,7 @@ class OccupancyGrid:
                         x_2 = int(x_v_f_id // self.deltaX) + origo[0] + int(0.5 * v_dims[1] / self.deltaX)
                         y_1 = int(y_v_f_id // self.deltaX) + origo[1]
                         y_2 = int(y_v_f_id // self.deltaX) + origo[1] + int(v_dims[0] / self.deltaY)
-                        if x_1<0 or x_2 >= size[0] or y_1<0 or y_2>=size[1]:
+                        if x_1 < 0 or x_2 >= size[0] or y_1 < 0 or y_2 >= size[1]:
                             continue
                         neighbourhood[x_1:x_2, y_1:y_2] = 1
 
@@ -142,6 +153,9 @@ class OccupancyGrid:
                     data_ego.append(neighbourhood)
                     # im = Image.fromarray(np.uint8(cm.gist_earth(neighbourhood) * 255))
                     # im.save("ego_" + str(ego_v_ID) + "_f_" + str(f_id) + ".png")
+                # Todo(Data): itt kellene a data_ego mellé appendelni az ego teljes trajektóriáját is. Lehet hogy sok
+                #  lesz, ezért egy teljesen különálló függvény gyárthatná le csak a trajektóriákat ugyan abban a
+                #  sorrendben és struktúrában
                 data_T.append(data_ego)
                 print("\tVehicles: ", len(data_T))
 
