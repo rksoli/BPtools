@@ -168,6 +168,48 @@ class OccupancyGrid:
             if len(data_T) > 0:
                 np.save(str(T) + '_' + str(i), np.array(data_T))
 
+    def trajectory_for_grid(self):
+        self.data["Time_Start"] = self.data["Global_Time"] / 100 - self.data["Frame_ID"] - 1.11343e+10
+        # Konvenció: az origó a közepétől eggyel jobbra és feljebb index
+        # delete
+        size = []
+        # origo = (size[0] // 2 + 1, size[1] // 2 + 1)
+        # idősor csoportosítás kezdő időpont szerint.
+        for T, group_time_start in self.data.groupby("Time_Start"):
+            print("T: ", T)
+            data_T = []
+            i = 1
+
+            # adott idősor csoportosítás: ego járművek
+            for ego_v_ID, group_ego_vehicles in group_time_start.groupby("Vehicle_ID"):
+                data_ego = []
+                ego = VehicleData(np.array(group_ego_vehicles))
+                # Todo(Data): itt az ego-ból kellene kinyerni a trajektóriát
+                print("\tEgo ID: ", ego_v_ID)
+                print("\tframes: ", ego.size)
+                ego_traj = np.concatenate((ego.x.reshape(-1,1), ego.y.reshape(-1,1), ego.lane_id.reshape(-1,1)), axis=1)
+                # for ego_lane_ID, group_ego_v_lane in group_ego_vehicles.groupby("Lane_ID"):
+                #     print("\t\tlane: ", ego_lane_ID)
+                # print(ego_traj.shape)
+                # print(ego_traj[0:10])
+                # print(ego_traj[60:70])
+
+
+                # Todo(Data): itt kellene a data_ego mellé appendelni az ego teljes trajektóriáját is. Lehet hogy sok
+                #  lesz, ezért egy teljesen különálló függvény gyárthatná le csak a trajektóriákat ugyan abban a
+                #  sorrendben és struktúrában
+                data_T.append(ego_traj)
+                print("\tVehicles: ", len(data_T))
+
+                if len(data_T) == 100:
+                    np.save("traj" + str(T) + '_' + str(i), np.array(data_T))
+                    data_T = []
+                    i = i + 1
+                # ha nem érte el a 100-at, ki kéne még menteni
+            # maradék data_T kimentése, ha van
+            if len(data_T) > 0:
+                np.save("traj" + str(T) + '_' + str(i), np.array(data_T))
+
 
 if __name__ == "__main__":
     '''
@@ -183,4 +225,5 @@ if __name__ == "__main__":
     # results_df = pd.DataFrame.from_records(results)
     # print(results_df.head())
     grid = OccupancyGrid(csv_file_name='../../../full_data/i-80.csv', deltaX=0.5, deltaY=0.5)
-    grid.grid_data_for_ae()
+    # grid.grid_data_for_ae()
+    grid.trajectory_for_grid()

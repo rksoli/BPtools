@@ -250,7 +250,7 @@ class VehicleData:
         indicator = 0
         index = 0
 
-        while (j < self.size -1) & (index == 0):
+        while (j < self.size - 1) & (index == 0):
             difference = self.lane_id[j + 1] - self.lane_id[j]
             if difference != 0:
                 index = j
