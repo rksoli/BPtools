@@ -184,11 +184,12 @@ class OccupancyGrid:
             for ego_v_ID, group_ego_vehicles in group_time_start.groupby("Vehicle_ID"):
                 data_ego = []
                 ego = VehicleData(np.array(group_ego_vehicles))
+                ego.lane_changing()
                 # Todo(Data): itt az ego-ból kellene kinyerni a trajektóriát
                 print("\tEgo ID: ", ego_v_ID)
                 print("\tframes: ", ego.size)
                 ego_traj = np.concatenate((ego.x.reshape(-1,1), ego.y.reshape(-1,1), ego.v.reshape(-1,1),
-                                           ego.lane_id.reshape(-1,1)), axis=1)
+                                           ego.lane_id.reshape(-1,1), ego.change_lane[:,0].reshape(-1,1)), axis=1)
                 # for ego_lane_ID, group_ego_v_lane in group_ego_vehicles.groupby("Lane_ID"):
                 #     print("\t\tlane: ", ego_lane_ID)
                 # print(ego_traj.shape)

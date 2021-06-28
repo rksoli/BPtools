@@ -242,6 +242,7 @@ class VehicleData:
                                  self.frames[i + 1]])
             else:
                 l_change.append([0, self.frames[i + 1]])
+        l_change.append([0, None])
         l_change = np.array(l_change)
         self.set_change_lane(l_change)
 
