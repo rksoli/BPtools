@@ -10,20 +10,22 @@ from matplotlib import cm
 class DataProcess:
     def __init__(self,
                  path,
-                 delta_T1=6.0,
+                 delta_T1=60,
                  delta_T2=None,
+                 grid_dT=5,
                  break_threshold=0.8,
                  overtaking=False,
                  braking=False
                  ):
         self.delta_T1 = delta_T1
         self.delta_T2 = delta_T2 if delta_T2 is not None else delta_T1
+        self.grid_dT = grid_dT
         self.break_threshold = break_threshold
         self.overtaking = overtaking
         self.braking = braking
         self.path = path
         self.__mode = "ob" if overtaking and braking else "o" if overtaking and not braking else "b" if not (
-                    overtaking or not braking) else None
+                overtaking or not braking) else None
         self.time_reg = ["31349.0", "67669.0", "75649.0"]
         self.maxnum_reg = [21, 19, 10]
 
@@ -35,15 +37,100 @@ class DataProcess:
     def path_trajs(self):
         return self.path + '/trajs'
 
+    @property
+    def delta_T12(self):
+        return self.delta_T1 + self.delta_T2
+
     def build_dataset(self):
         for T, N in zip(self.time_reg, self.maxnum_reg):
-            for n in range(N):
-                grid_Tn = np.load(self.path_grids +"/"+T+"_"+str(n)+".npy", allow_pickle=True)
-                trajs_Tn = np.load(self.path_trajs +"/traj"+T+"_"+str(n)+".npy", allow_pickle=True)
+            print(T)
+            trajectories1 = []
+            trajectories2 = []
+            grids_1 = []
+            grids_2 = []
+            labels = []
+            for n in range(1, N):
+                print(n)
+                grid_Tn = np.load(self.path_grids + "/" + T + "_" + str(n) + ".npy", allow_pickle=True)
+                trajs_Tn = np.load(self.path_trajs + "/traj" + T + "_" + str(n) + ".npy", allow_pickle=True)
+                # for trajs_Tn_i in trajs_Tn:
+                for i in range(100):
+                    print(i)
+                    lefts = np.where(trajs_Tn[i][:, 4] == -1)[0]
+                    rights = np.where(trajs_Tn[i][:, 4] == 1)[0]
+                    # lefts = np.where(trajs_Tn_i[:, 4] == -1)[0]
+                    # rights = np.where(trajs_Tn_i[:, 4] == 1)[0]
+                    left_size = lefts.size
+                    right_size = rights.size
 
+                    if left_size + right_size == 0:
+                        # lane keeping
+                        if trajs_Tn[i].shape[0] > self.delta_T12:
+                            index = trajs_Tn[i].shape[0] - self.delta_T12
+                            trajectories1.append(trajs_Tn[i][index:index+self.delta_T1, 0:2])
+                            trajectories2.append(trajs_Tn[i][index + self.delta_T1:index + self.delta_T12, 0:2])
+                            gtni_1 = np.array(grid_Tn[i][index:index+self.delta_T1:self.grid_dT])[:, 7:23,63:191]
+                            gtni_2 = np.array(grid_Tn[i][index + self.delta_T1:index+self.delta_T12:self.grid_dT])[:,
+                                     7:23,63:191]
+                            grids_1.append(gtni_1)
+                            grids_2.append(gtni_2)
+                            labels.append([0,1,0])
+                        continue
+                    if left_size + right_size == 1:
+                        if left_size == 1:
+                            # left change
+                            # print("left", lefts[0], lefts[0] > 60, lefts[0] + 60 < trajs_Tn[i].shape[0])
+                            if (lefts[0] > self.delta_T1) and (lefts[0] + self.delta_T2 < trajs_Tn[i].shape[0]):
+                                trajectories1.append(trajs_Tn[i][lefts[0] - self.delta_T1:lefts[0], 0:2])
+                                trajectories2.append(trajs_Tn[i][lefts[0]:lefts[0] + self.delta_T2, 0:2])
+                                gtni_1 = np.array(grid_Tn[i][lefts[0] - self.delta_T1:lefts[0]:self.grid_dT])[:, 7:23,
+                                         63:191]
+                                gtni_2 = np.array(grid_Tn[i][lefts[0]:lefts[0] + self.delta_T2:self.grid_dT])[:, 7:23,
+                                         63:191]
+                                grids_1.append(gtni_1)
+                                grids_2.append(gtni_2)
+                                labels.append([1,0,0])
+                                pass
+                        else:
+                            # right change
+                            # print("right", rights[0], rights[0] > 60, rights[0] + 60 < trajs_Tn[i].shape[0])
+                            if (rights[0] > self.delta_T1) and (rights[0] + self.delta_T2 < trajs_Tn[i].shape[0]):
+                                trajectories1.append(trajs_Tn[i][rights[0] - self.delta_T1:rights[0], 0:2])
+                                trajectories2.append(trajs_Tn[i][rights[0]:rights[0] + self.delta_T2, 0:2])
+                                gtni_1 = np.array(grid_Tn[i][rights[0] - self.delta_T1:rights[0]:self.grid_dT])[:, 7:23,
+                                         63:191]
+                                gtni_2 = np.array(grid_Tn[i][rights[0]:rights[0] + self.delta_T2:self.grid_dT])[:, 7:23,
+                                         63:191]
+                                grids_1.append(gtni_1)
+                                grids_2.append(gtni_2)
+                                labels.append([0,0,1])
+                            pass
+                    if left_size + right_size == 2:
+                        if left_size == 1:
+                            # overtake
+                            # print("overtake")
+                            # print(lefts < rights)
+                            pass
+                        elif left_size == 2:
+                            # double left change
+                            # print("double left")
+                            pass
+                        else:
+                            # double right change
+                            # print("double right")
+                            pass
+            np.save("trajectories1", np.array(trajectories1))
+            np.save("trajectories2", np.array(trajectories2))
+            np.save("grids1", np.array(grids_1))
+            np.save("grids2", np.array(grids_2))
+            np.save("labels", np.array(labels))
 
 
 if __name__ == "__main__":
-    data = DataProcess(path='D:/dataset')
-    print(data.path_grids, data.path_trajs)
-
+    # data = DataProcess(path='D:/dataset')
+    # print(data.path_grids, data.path_trajs)
+    # data.build_dataset()
+    labels = np.load("labels.npy")
+    print("keep", np.sum(np.prod((labels==np.array([0,1,0])), axis=1)))
+    print("left", np.sum(np.prod((labels==np.array([1,0,0])), axis=1)))
+    print("right", np.sum(np.prod((labels==np.array([0,0,1])), axis=1)))
