@@ -91,6 +91,12 @@ class OccupancyGrid:
         # idősor csoportosítás kezdő időpont szerint.
         for T, group_time_start in self.data.groupby("Time_Start"):
             print("T: ", T)
+            tj=0
+            if T == 75649:
+                pass
+            else:
+                continue
+
             data_T = []
             i = 1
 
@@ -177,6 +183,7 @@ class OccupancyGrid:
         # idősor csoportosítás kezdő időpont szerint.
         for T, group_time_start in self.data.groupby("Time_Start"):
             print("T: ", T)
+
             data_T = []
             i = 1
 
@@ -227,5 +234,5 @@ if __name__ == "__main__":
     # results_df = pd.DataFrame.from_records(results)
     # print(results_df.head())
     grid = OccupancyGrid(csv_file_name='../../../full_data/i-80.csv', deltaX=0.5, deltaY=0.5)
-    # grid.grid_data_for_ae()
-    grid.trajectory_for_grid()
+    grid.grid_data_for_ae()
+    # grid.trajectory_for_grid()

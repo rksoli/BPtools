@@ -27,7 +27,7 @@ class DataProcess:
         self.__mode = "ob" if overtaking and braking else "o" if overtaking and not braking else "b" if not (
                 overtaking or not braking) else None
         self.time_reg = ["31349.0", "67669.0", "75649.0"]
-        self.maxnum_reg = [21, 19, 10]
+        self.maxnum_reg = [21, 19, 17]
 
     @property
     def path_grids(self):
