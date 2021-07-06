@@ -90,7 +90,7 @@ class DataProcess:
                                 grids_1.append(gtni_1)
                                 grids_2.append(gtni_2)
                                 labels.append([1,0,0])
-                                pass
+
                         else:
                             # right change
                             # print("right", rights[0], rights[0] > 60, rights[0] + 60 < trajs_Tn[i].shape[0])
@@ -104,7 +104,7 @@ class DataProcess:
                                 grids_1.append(gtni_1)
                                 grids_2.append(gtni_2)
                                 labels.append([0,0,1])
-                            pass
+
                     if left_size + right_size == 2:
                         if left_size == 1:
                             # overtake
@@ -114,11 +114,33 @@ class DataProcess:
                         elif left_size == 2:
                             # double left change
                             # print("double left")
-                            pass
+                            for left_n in lefts:
+                                if (left_n > self.delta_T1) and (left_n + self.delta_T2 < trajs_Tn[i].shape[0]):
+                                    trajectories1.append(trajs_Tn[i][left_n - self.delta_T1:left_n, 0:2])
+                                    trajectories2.append(trajs_Tn[i][left_n:left_n + self.delta_T2, 0:2])
+                                    gtni_1 = np.array(grid_Tn[i][left_n - self.delta_T1:left_n:self.grid_dT])[:, 7:23,
+                                             63:191]
+                                    gtni_2 = np.array(grid_Tn[i][left_n:left_n + self.delta_T2:self.grid_dT])[:, 7:23,
+                                             63:191]
+                                    grids_1.append(gtni_1)
+                                    grids_2.append(gtni_2)
+                                    labels.append([1,0,0])
+
                         else:
                             # double right change
                             # print("double right")
-                            pass
+                            for right_n in rights:
+                                if (right_n > self.delta_T1) and (right_n + self.delta_T2 < trajs_Tn[i].shape[0]):
+                                    trajectories1.append(trajs_Tn[i][right_n - self.delta_T1:right_n, 0:2])
+                                    trajectories2.append(trajs_Tn[i][right_n:right_n + self.delta_T2, 0:2])
+                                    gtni_1 = np.array(grid_Tn[i][right_n - self.delta_T1:right_n:self.grid_dT])[:, 7:23,
+                                             63:191]
+                                    gtni_2 = np.array(grid_Tn[i][right_n:right_n + self.delta_T2:self.grid_dT])[:, 7:23,
+                                             63:191]
+                                    grids_1.append(gtni_1)
+                                    grids_2.append(gtni_2)
+                                    labels.append([0,0,1])
+
             np.save("trajectories1", np.array(trajectories1))
             np.save("trajectories2", np.array(trajectories2))
             np.save("grids1", np.array(grids_1))
@@ -127,7 +149,8 @@ class DataProcess:
 
 
 if __name__ == "__main__":
-    data = DataProcess(path='D:/dataset')
+    # data = DataProcess(path='D:/dataset')
+    data = DataProcess(path='../../../dataset')
     # print(data.path_grids, data.path_trajs)
     data.build_dataset()
     labels = np.load("labels.npy")
