@@ -234,5 +234,5 @@ if __name__ == "__main__":
     # results_df = pd.DataFrame.from_records(results)
     # print(results_df.head())
     grid = OccupancyGrid(csv_file_name='../../../full_data/us-101.csv', deltaX=0.5, deltaY=0.5)
-    # grid.grid_data_for_ae()
+    grid.grid_data_for_ae()
     grid.trajectory_for_grid()
