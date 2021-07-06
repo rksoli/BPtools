@@ -45,6 +45,26 @@ def trajs_to_img(real, gen, label):
     return buf
 
 
+def trajs_to_img_2(label, **kwargs):
+    XX = []
+    YY = []
+    fig = plt.figure()
+    for key, value in kwargs.items():
+        xx = [t[0] for t in value]
+        yy = [t[1] for t in value]
+        XX.append(xx)
+        YY.append(yy)
+        plt.plot(yy, xx, label=key)
+
+    plt.title(label)
+    plt.legend()
+    buf = io.BytesIO()
+    plt.savefig(buf, format="png")
+    buf.seek(0)
+    return buf
+
+
+
 def plot_target_pred(target, prediction, label=None, category=None):
     x_target = [t[0] for t in target]
     y_target = [t[1] for t in target]
