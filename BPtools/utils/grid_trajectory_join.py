@@ -127,9 +127,9 @@ class DataProcess:
 
 
 if __name__ == "__main__":
-    # data = DataProcess(path='D:/dataset')
+    data = DataProcess(path='D:/dataset')
     # print(data.path_grids, data.path_trajs)
-    # data.build_dataset()
+    data.build_dataset()
     labels = np.load("labels.npy")
     print("keep", np.sum(np.prod((labels==np.array([0,1,0])), axis=1)))
     print("left", np.sum(np.prod((labels==np.array([1,0,0])), axis=1)))
