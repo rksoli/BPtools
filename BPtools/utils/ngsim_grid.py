@@ -217,7 +217,7 @@ class OccupancyGrid:
                 # ha nem érte el a 100-at, ki kéne még menteni
             # maradék data_T kimentése, ha van
             if len(data_T) > 0:
-                np.save("traj" + str(T) + '_' + str(i), np.array(data_T))
+                np.save("D:/dataset/us-101/traj" + str(T) + '_' + str(i), np.array(data_T))
 
 
 if __name__ == "__main__":
@@ -234,5 +234,5 @@ if __name__ == "__main__":
     # results_df = pd.DataFrame.from_records(results)
     # print(results_df.head())
     grid = OccupancyGrid(csv_file_name='../../../full_data/us-101.csv', deltaX=0.5, deltaY=0.5)
-    grid.grid_data_for_ae()
-    # grid.trajectory_for_grid()
+    # grid.grid_data_for_ae()
+    grid.trajectory_for_grid()
