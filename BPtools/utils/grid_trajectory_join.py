@@ -26,8 +26,11 @@ class DataProcess:
         self.path = path
         self.__mode = "ob" if overtaking and braking else "o" if overtaking and not braking else "b" if not (
                 overtaking or not braking) else None
-        self.time_reg = ["31349.0", "67669.0", "75649.0"]
-        self.maxnum_reg = [21, 19, 17]
+        # self.time_reg = ["31349.0", "67669.0", "75649.0"] # i-80
+        # self.maxnum_reg = [21, 19, 17] # i-80
+        # első 3 i-80, második 3 us-101
+        self.time_reg = ["31349.0", "67669.0", "75649.0", "54169789.0", "54178420.0", "54187570.0"]
+        self.maxnum_reg = [21, 19, 17, 22, 21, 20]
 
     @property
     def path_grids(self):
@@ -42,20 +45,37 @@ class DataProcess:
         return self.delta_T1 + self.delta_T2
 
     def build_dataset(self):
+        trajectories1 = []
+        trajectories2 = []
+        grids_1 = []
+        grids_2 = []
+        labels = []
+        wrongs = 0
         for T, N in zip(self.time_reg, self.maxnum_reg):
             print(T)
-            trajectories1 = []
-            trajectories2 = []
-            grids_1 = []
-            grids_2 = []
-            labels = []
+
             for n in range(1, N):
+                if (T == "54178420.0") and ((n == 4) or (n==5)):
+                    print("dik")
+                    # continue
                 print(n)
-                grid_Tn = np.load(self.path_grids + "/" + T + "_" + str(n) + ".npy", allow_pickle=True)
+                try:
+                    grid_Tn = np.load(self.path_grids + "/" + T + "_" + str(n) + ".npy", allow_pickle=True)
+                except:
+                    print("There is no input in grids")
+                    continue
                 trajs_Tn = np.load(self.path_trajs + "/traj" + T + "_" + str(n) + ".npy", allow_pickle=True)
                 # for trajs_Tn_i in trajs_Tn:
-                for i in range(100):
+                for i in range(len(trajs_Tn)):
                     print(i)
+                    # if (T == "54178420.0") and ((n == 4) or (n == 5)):
+                    #     print("dik dik")
+                    #     print("traj ", trajs_Tn[i].shape)
+                    #     print("grid ", len(grid_Tn[i]), grid_Tn[i][0].shape)
+                    if trajs_Tn[i].shape[0] != len(grid_Tn[i]):
+                        wrongs += 1
+                        print(i, "Not equal")
+                        continue
                     lefts = np.where(trajs_Tn[i][:, 4] == -1)[0]
                     rights = np.where(trajs_Tn[i][:, 4] == 1)[0]
                     # lefts = np.where(trajs_Tn_i[:, 4] == -1)[0]
@@ -141,16 +161,17 @@ class DataProcess:
                                     grids_2.append(gtni_2)
                                     labels.append([0,0,1])
 
-            np.save("trajectories1", np.array(trajectories1))
-            np.save("trajectories2", np.array(trajectories2))
-            np.save("grids1", np.array(grids_1))
-            np.save("grids2", np.array(grids_2))
-            np.save("labels", np.array(labels))
+        np.save("trajectories1", np.array(trajectories1))
+        np.save("trajectories2", np.array(trajectories2))
+        np.save("grids1", np.array(grids_1))
+        np.save("grids2", np.array(grids_2))
+        np.save("labels", np.array(labels))
+        print("Not equal samples: ", wrongs)
 
 
 if __name__ == "__main__":
-    # data = DataProcess(path='D:/dataset')
-    data = DataProcess(path='../../../dataset')
+    data = DataProcess(path='D:/dataset/')
+    # data = DataProcess(path='../../../dataset')
     # print(data.path_grids, data.path_trajs)
     data.build_dataset()
     labels = np.load("labels.npy")

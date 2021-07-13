@@ -91,17 +91,24 @@ class OccupancyGrid:
         # idősor csoportosítás kezdő időpont szerint.
         for T, group_time_start in self.data.groupby("Time_Start"):
             print("T: ", T)
-            # tj=0
-            # if T == 75649:
-            #     pass
-            # else:
-            #     continue
+            tj=0
+            if T == 54178420:
+                pass
+            else:
+                continue
 
             data_T = []
             i = 1
+            j=1
+            go = False
 
             # adott idősor csoportosítás: ego járművek
             for ego_v_ID, group_ego_vehicles in group_time_start.groupby("Vehicle_ID"):
+                # if j < 400:
+                #     j = j + 1
+                #     continue
+                # else:
+                #     i = 4
                 data_ego = []
                 ego = VehicleData(np.array(group_ego_vehicles))
                 # Todo(Data): itt az ego-ból kellene kinyerni a trajektóriát
@@ -110,6 +117,7 @@ class OccupancyGrid:
 
                 # adott idősor csoportosítás: frame ID szerint
                 for f_id, group_frame in group_time_start.groupby("Frame_ID"):
+
                     neighbourhood = np.zeros(size, dtype=np.uint8)
                     # EGO
                     # Ego pozíciója f_id-ben
@@ -211,7 +219,7 @@ class OccupancyGrid:
                 print("\tVehicles: ", len(data_T))
 
                 if len(data_T) == 100:
-                    np.save("traj" + str(T) + '_' + str(i), np.array(data_T))
+                    np.save("D:/dataset/us-101/traj" + str(T) + '_' + str(i), np.array(data_T))
                     data_T = []
                     i = i + 1
                 # ha nem érte el a 100-at, ki kéne még menteni
@@ -233,6 +241,6 @@ if __name__ == "__main__":
     # results = client.get("8ect-6jqj")#, limit=2000)
     # results_df = pd.DataFrame.from_records(results)
     # print(results_df.head())
-    grid = OccupancyGrid(csv_file_name='../../../full_data/us-101.csv', deltaX=0.5, deltaY=0.5)
-    grid.grid_data_for_ae()
+    grid = OccupancyGrid(csv_file_name='../../../full_data/i-80.csv', deltaX=0.5, deltaY=0.5)
+    # grid.grid_data_for_ae()
     grid.trajectory_for_grid()
