@@ -200,7 +200,6 @@ class OccupancyGrid:
                 data_ego = []
                 ego = VehicleData(np.array(group_ego_vehicles))
                 ego.lane_changing()
-                # Todo(Data): itt az ego-ból kellene kinyerni a trajektóriát
                 print("\tEgo ID: ", ego_v_ID)
                 print("\tframes: ", ego.size)
                 ego_traj = np.concatenate((ego.x.reshape(-1,1), ego.y.reshape(-1,1), ego.v.reshape(-1,1),
@@ -210,11 +209,9 @@ class OccupancyGrid:
                 # print(ego_traj.shape)
                 # print(ego_traj[0:10])
                 # print(ego_traj[60:70])
+                # TODO: Seggbebaszni Gébort gecidurván
 
 
-                # Todo(Data): itt kellene a data_ego mellé appendelni az ego teljes trajektóriáját is. Lehet hogy sok
-                #  lesz, ezért egy teljesen különálló függvény gyárthatná le csak a trajektóriákat ugyan abban a
-                #  sorrendben és struktúrában
                 data_T.append(ego_traj)
                 print("\tVehicles: ", len(data_T))
 
