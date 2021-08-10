@@ -182,7 +182,7 @@ class VehicleData:
         # frame ID
         self.frames = data[:, 1]
         # total frame number
-        self.size = int(data[0, 2])
+        self.size = self.frames.size  # int(data[0, 2])
         # global time
         self.t = data[:, 3]
         # lateral x coordinate
