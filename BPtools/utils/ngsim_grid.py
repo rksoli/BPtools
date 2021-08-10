@@ -166,13 +166,13 @@ class OccupancyGrid:
                 print("\tVehicles: ", len(data_T))
 
                 if len(data_T) == 100:
-                    np.save('D:/dataset/us-101/' + str(T) + '_' + str(i), np.array(data_T))
+                    np.save(str(T) + '_' + str(i), np.array(data_T))
                     data_T = []
                     i = i + 1
                 # ha nem érte el a 100-at, ki kéne még menteni
             # maradék data_T kimentése, ha van
             if len(data_T) > 0:
-                np.save('D:/dataset/us-101/' + str(T) + '_' + str(i), np.array(data_T))
+                np.save(str(T) + '_' + str(i), np.array(data_T))
 
     def trajectory_for_grid(self):
         self.data["Time_Start"] = self.data["Global_Time"] / 100 - self.data["Frame_ID"] - 1.11343e+10
