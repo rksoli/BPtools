@@ -209,7 +209,6 @@ class OccupancyGrid:
                 # print(ego_traj.shape)
                 # print(ego_traj[0:10])
                 # print(ego_traj[60:70])
-                # TODO: Seggbebaszni Gébort gecidurván
 
 
                 data_T.append(ego_traj)
