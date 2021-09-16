@@ -170,8 +170,8 @@ class DataProcess:
 
 
 if __name__ == "__main__":
-    data = DataProcess(path='D:/dataset/', grid_dT=1)
-    # data = DataProcess(path='../../../dataset')
+    # data = DataProcess(path='D:/dataset/', grid_dT=1)
+    data = DataProcess(path='../../../dataset')
     # print(data.path_grids, data.path_trajs)
     data.build_dataset()
     labels = np.load("labels.npy")
