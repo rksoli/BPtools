@@ -30,6 +30,7 @@ class DataProcess:
         # self.time_reg = ["31349.0", "67669.0", "75649.0"] # i-80
         # self.maxnum_reg = [21, 19, 17] # i-80
         # első 3 i-80, második 3 us-101
+        # TODO ezeket kerestem 1 óráig :(
         self.time_reg = ["31349.0", "67669.0", "75649.0", "54169789.0", "54178420.0", "54187570.0"]
         self.maxnum_reg = [21, 19, 17, 22, 21, 20]
 
