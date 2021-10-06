@@ -174,13 +174,13 @@ class OccupancyGrid:
                 print("\tVehicles: ", len(data_T))
 
                 if len(data_T) == 100:
-                    np.save('D:/dataset/us-101/' + str(T) + '_' + str(i), np.array(data_T))
+                    np.save(str(T) + '_' + str(i), np.array(data_T))
                     data_T = []
                     i = i + 1
                 # ha nem érte el a 100-at, ki kéne még menteni
             # maradék data_T kimentése, ha van
             if len(data_T) > 0:
-                np.save('D:/dataset/us-101/' + str(T) + '_' + str(i), np.array(data_T))
+                np.save(str(T) + '_' + str(i), np.array(data_T))
 
     def trajectory_for_grid(self):
         self.data["Time_Start"] = self.data["Global_Time"] / 100 - self.data["Frame_ID"] - 1.11343e+10
@@ -215,13 +215,13 @@ class OccupancyGrid:
                 print("\tVehicles: ", len(data_T))
 
                 if len(data_T) == 100:
-                    np.save("D:/dataset/us-101/traj" + str(T) + '_' + str(i), np.array(data_T))
-                    data_T = []
+                    np.save("../../..//dataset/us-101/traj" + str(T) + '_' + str(i), np.array(data_T))
+                    data_T = []  # "D:/
                     i = i + 1
                 # ha nem érte el a 100-at, ki kéne még menteni
             # maradék data_T kimentése, ha van
             if len(data_T) > 0:
-                np.save("D:/dataset/us-101/traj" + str(T) + '_' + str(i), np.array(data_T))
+                np.save("../../../dataset/us-101/traj" + str(T) + '_' + str(i), np.array(data_T))
 
 
 if __name__ == "__main__":
@@ -237,6 +237,6 @@ if __name__ == "__main__":
     # results = client.get("8ect-6jqj")#, limit=2000)
     # results_df = pd.DataFrame.from_records(results)
     # print(results_df.head())
-    grid = OccupancyGrid(csv_file_name='../../../full_data/i-80.csv', deltaX=0.5, deltaY=0.5)
+    grid = OccupancyGrid(csv_file_name='../../../full_data/us-101.csv', deltaX=0.5, deltaY=0.5)
     # grid.grid_data_for_ae()
     grid.trajectory_for_grid()
