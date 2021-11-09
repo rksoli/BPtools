@@ -11,13 +11,15 @@ import matplotlib.pyplot as plt
 class DataProcess:
     def __init__(self,
                  path,
+                 pred_T=10,
                  delta_T1=60,
                  delta_T2=None,
-                 grid_dT=5,
+                 grid_dT=1,
                  break_threshold=0.8,
                  overtaking=False,
                  braking=False
                  ):
+        self.pred_T = pred_T
         self.delta_T1 = delta_T1
         self.delta_T2 = delta_T2 if delta_T2 is not None else delta_T1
         self.grid_dT = grid_dT
@@ -64,7 +66,7 @@ class DataProcess:
         grids_2 = []
         labels = []
         labels_long = []
-        velocity_ratios = []
+        # velocity_ratios = []
         wrongs = 0
         for T, N in zip(self.time_reg, self.maxnum_reg):
             print(T)
@@ -103,57 +105,59 @@ class DataProcess:
                     right_size = rights.size
 
                     """Longitudinal information"""
-                    velocity_ratio = trajs_Tn[i][self.delta_T1, 3] / trajs_Tn[i][0, 3]
-                    velocity_ratios.append(velocity_ratio)
+                    # velocity_ratio = trajs_Tn[i][self.delta_T1, 3] / trajs_Tn[i][0, 3]
+                    # velocity_ratios.append(velocity_ratio)
 
                     if left_size + right_size == 0:
                         # lane keeping
                         if trajs_Tn[i].shape[0] > self.delta_T12:
                             index = trajs_Tn[i].shape[0] - self.delta_T12
-                            # trajectories1.append(trajs_Tn[i][index:index+self.delta_T1, 0:2])
-                            # trajectories2.append(trajs_Tn[i][index + self.delta_T1:index + self.delta_T12, 0:2])
-                            # gtni_1 = np.array(grid_Tn[i][index:index+self.delta_T1:self.grid_dT])[:, 7:23,63:191]
-                            # gtni_2 = np.array(grid_Tn[i][index + self.delta_T1:index+self.delta_T12:self.grid_dT])[:,
-                            #          7:23,63:191]
-                            # grids_1.append(gtni_1)
-                            # grids_2.append(gtni_2)
-                            # labels.append([0,1,0])
+                            trajectories1.append(trajs_Tn[i][index:index+self.delta_T1, 0:2])
+                            trajectories2.append(trajs_Tn[i][index + self.delta_T1:index + self.delta_T12, 0:2])
+                            gtni_1 = np.array(grid_Tn[i][index:index+self.delta_T1:self.grid_dT])[:, 7:23,63:191]
+                            gtni_2 = np.array(grid_Tn[i][index + self.delta_T1:index+self.delta_T12:self.grid_dT])[:,
+                                     7:23,63:191]
+                            grids_1.append(gtni_1)
+                            grids_2.append(gtni_2)
+                            labels.append([0,1,0])
 
-                            velocity_ratio = trajs_Tn[i][index, 3] / trajs_Tn[i][index+self.delta_T1, 3]
-                            velocity_ratios.append(velocity_ratio)
+                            # velocity_ratio = trajs_Tn[i][index, 3] / trajs_Tn[i][index+self.delta_T1, 3]
+                            # velocity_ratios.append(velocity_ratio)
                         continue
                     if left_size + right_size == 1:
                         if left_size == 1:
                             # left change
                             # print("left", lefts[0], lefts[0] > 60, lefts[0] + 60 < trajs_Tn[i].shape[0])
-                            if (lefts[0] > self.delta_T1) and (lefts[0] + self.delta_T2 < trajs_Tn[i].shape[0]):
-                                # trajectories1.append(trajs_Tn[i][lefts[0] - self.delta_T1:lefts[0], 0:2])
-                                # trajectories2.append(trajs_Tn[i][lefts[0]:lefts[0] + self.delta_T2, 0:2])
-                                # gtni_1 = np.array(grid_Tn[i][lefts[0] - self.delta_T1:lefts[0]:self.grid_dT])[:, 7:23,
-                                #          63:191]
-                                # gtni_2 = np.array(grid_Tn[i][lefts[0]:lefts[0] + self.delta_T2:self.grid_dT])[:, 7:23,
-                                #          63:191]
-                                # grids_1.append(gtni_1)
-                                # grids_2.append(gtni_2)
-                                # labels.append([1,0,0])
-                                velocity_ratio = trajs_Tn[i][lefts[0] - self.delta_T1, 3] / trajs_Tn[i][lefts[0], 3]
-                                velocity_ratios.append(velocity_ratio)
+                            if (lefts[0] > self.delta_T1+self.pred_T) and (lefts[0] + self.delta_T2 < trajs_Tn[i].shape[0]):
+                                trajectories1.append(trajs_Tn[i][lefts[0] - self.delta_T1 - self.pred_T:lefts[0] - self.pred_T, 0:2])
+                                trajectories2.append(trajs_Tn[i][lefts[0] - self.pred_T:lefts[0] + self.delta_T2 - self.pred_T, 0:2])
+                                gtni_1 = np.array(grid_Tn[i][lefts[0] - self.delta_T1 - self.pred_T:lefts[0] - self.pred_T:self.grid_dT])[:, 7:23,
+                                         63:191]
+                                gtni_2 = np.array(grid_Tn[i][lefts[0] - self.pred_T:lefts[0] + self.delta_T2 - self.pred_T:self.grid_dT])[:, 7:23,
+                                         63:191]
+                                grids_1.append(gtni_1)
+                                grids_2.append(gtni_2)
+                                labels.append([1,0,0])
+
+                                # velocity_ratio = trajs_Tn[i][lefts[0] - self.delta_T1, 3] / trajs_Tn[i][lefts[0], 3]
+                                # velocity_ratios.append(velocity_ratio)
 
                         else:
                             # right change
                             # print("right", rights[0], rights[0] > 60, rights[0] + 60 < trajs_Tn[i].shape[0])
-                            if (rights[0] > self.delta_T1) and (rights[0] + self.delta_T2 < trajs_Tn[i].shape[0]):
-                                # trajectories1.append(trajs_Tn[i][rights[0] - self.delta_T1:rights[0], 0:2])
-                                # trajectories2.append(trajs_Tn[i][rights[0]:rights[0] + self.delta_T2, 0:2])
-                                # gtni_1 = np.array(grid_Tn[i][rights[0] - self.delta_T1:rights[0]:self.grid_dT])[:, 7:23,
-                                #          63:191]
-                                # gtni_2 = np.array(grid_Tn[i][rights[0]:rights[0] + self.delta_T2:self.grid_dT])[:, 7:23,
-                                #          63:191]
-                                # grids_1.append(gtni_1)
-                                # grids_2.append(gtni_2)
-                                # labels.append([0,0,1])
-                                velocity_ratio = trajs_Tn[i][rights[0] - self.delta_T1, 3] / trajs_Tn[i][rights[0], 3]
-                                velocity_ratios.append(velocity_ratio)
+                            if (rights[0] > self.delta_T1+self.pred_T) and (rights[0] + self.delta_T2 < trajs_Tn[i].shape[0]):
+                                trajectories1.append(trajs_Tn[i][rights[0] - self.delta_T1 - self.pred_T:rights[0] - self.pred_T, 0:2])
+                                trajectories2.append(trajs_Tn[i][rights[0] - self.pred_T:rights[0] + self.delta_T2 - self.pred_T, 0:2])
+                                gtni_1 = np.array(grid_Tn[i][rights[0] - self.delta_T1 - self.pred_T:rights[0] - self.pred_T:self.grid_dT])[:, 7:23,
+                                         63:191]
+                                gtni_2 = np.array(grid_Tn[i][rights[0] - self.pred_T:rights[0] + self.delta_T2 - self.pred_T:self.grid_dT])[:, 7:23,
+                                         63:191]
+                                grids_1.append(gtni_1)
+                                grids_2.append(gtni_2)
+                                labels.append([0,0,1])
+
+                                # velocity_ratio = trajs_Tn[i][rights[0] - self.delta_T1, 3] / trajs_Tn[i][rights[0], 3]
+                                # velocity_ratios.append(velocity_ratio)
 
                     if left_size + right_size == 2:
                         if left_size == 1:
@@ -165,53 +169,55 @@ class DataProcess:
                             # double left change
                             # print("double left")
                             for left_n in lefts:
-                                if (left_n > self.delta_T1) and (left_n + self.delta_T2 < trajs_Tn[i].shape[0]):
-                                    # trajectories1.append(trajs_Tn[i][left_n - self.delta_T1:left_n, 0:2])
-                                    # trajectories2.append(trajs_Tn[i][left_n:left_n + self.delta_T2, 0:2])
-                                    # gtni_1 = np.array(grid_Tn[i][left_n - self.delta_T1:left_n:self.grid_dT])[:, 7:23,
-                                    #          63:191]
-                                    # gtni_2 = np.array(grid_Tn[i][left_n:left_n + self.delta_T2:self.grid_dT])[:, 7:23,
-                                    #          63:191]
-                                    # grids_1.append(gtni_1)
-                                    # grids_2.append(gtni_2)
-                                    # labels.append([1,0,0])
-                                    velocity_ratio = trajs_Tn[i][left_n - self.delta_T1, 3] / trajs_Tn[i][left_n, 3]
-                                    velocity_ratios.append(velocity_ratio)
+                                if (left_n > self.delta_T1+self.pred_T) and (left_n + self.delta_T2 < trajs_Tn[i].shape[0]):
+                                    trajectories1.append(trajs_Tn[i][left_n - self.delta_T1 - self.pred_T:left_n - self.pred_T, 0:2])
+                                    trajectories2.append(trajs_Tn[i][left_n - self.pred_T:left_n + self.delta_T2 - self.pred_T, 0:2])
+                                    gtni_1 = np.array(grid_Tn[i][left_n - self.delta_T1 - self.pred_T:left_n - self.pred_T:self.grid_dT])[:, 7:23,
+                                             63:191]
+                                    gtni_2 = np.array(grid_Tn[i][left_n - self.pred_T:left_n + self.delta_T2 - self.pred_T:self.grid_dT])[:, 7:23,
+                                             63:191]
+                                    grids_1.append(gtni_1)
+                                    grids_2.append(gtni_2)
+                                    labels.append([1,0,0])
+
+                                    # velocity_ratio = trajs_Tn[i][left_n - self.delta_T1, 3] / trajs_Tn[i][left_n, 3]
+                                    # velocity_ratios.append(velocity_ratio)
 
                         else:
                             # double right change
                             # print("double right")
                             for right_n in rights:
-                                if (right_n > self.delta_T1) and (right_n + self.delta_T2 < trajs_Tn[i].shape[0]):
-                                    # trajectories1.append(trajs_Tn[i][right_n - self.delta_T1:right_n, 0:2])
-                                    # trajectories2.append(trajs_Tn[i][right_n:right_n + self.delta_T2, 0:2])
-                                    # gtni_1 = np.array(grid_Tn[i][right_n - self.delta_T1:right_n:self.grid_dT])[:, 7:23,
-                                    #          63:191]
-                                    # gtni_2 = np.array(grid_Tn[i][right_n:right_n + self.delta_T2:self.grid_dT])[:, 7:23,
-                                    #          63:191]
-                                    # grids_1.append(gtni_1)
-                                    # grids_2.append(gtni_2)
-                                    # labels.append([0,0,1])
-                                    velocity_ratio = trajs_Tn[i][right_n - self.delta_T1, 3] / trajs_Tn[i][right_n, 3]
-                                    velocity_ratios.append(velocity_ratio)
+                                if (right_n > self.delta_T1+self.pred_T) and (right_n + self.delta_T2 < trajs_Tn[i].shape[0]):
+                                    trajectories1.append(trajs_Tn[i][right_n - self.delta_T1 - self.pred_T:right_n - self.pred_T, 0:2])
+                                    trajectories2.append(trajs_Tn[i][right_n - self.pred_T:right_n + self.delta_T2 - self.pred_T, 0:2])
+                                    gtni_1 = np.array(grid_Tn[i][right_n - self.delta_T1 - self.pred_T:right_n - self.pred_T:self.grid_dT])[:, 7:23,
+                                             63:191]
+                                    gtni_2 = np.array(grid_Tn[i][right_n - self.pred_T:right_n + self.delta_T2 - self.pred_T:self.grid_dT])[:, 7:23,
+                                             63:191]
+                                    grids_1.append(gtni_1)
+                                    grids_2.append(gtni_2)
+                                    labels.append([0,0,1])
+
+                                    # velocity_ratio = trajs_Tn[i][right_n - self.delta_T1, 3] / trajs_Tn[i][right_n, 3]
+                                    # velocity_ratios.append(velocity_ratio)
         """histogram for velocities"""
-        n = len(velocity_ratios)
-        np.save("velocity_ratios_2", velocity_ratios)
-        velocity_ratios = np.array(velocity_ratios)
-        q25, q75 = np.percentile(velocity_ratios, [0.25, 0.75])
-        bin_width = 2*(q75 - q25)*n**(-1/3)
-        # bins = int(round((velocity_ratios.max() - velocity_ratios.min())/bin_width))
-        plt.hist(velocity_ratios, density=True, bins=10)
-        plt.show()
+        # n = len(velocity_ratios)
+        # np.save("velocity_ratios_2", velocity_ratios)
+        # velocity_ratios = np.array(velocity_ratios)
+        # q25, q75 = np.percentile(velocity_ratios, [0.25, 0.75])
+        # bin_width = 2*(q75 - q25)*n**(-1/3)
+        # # bins = int(round((velocity_ratios.max() - velocity_ratios.min())/bin_width))
+        # plt.hist(velocity_ratios, density=True, bins=10)
+        # plt.show()
 
 
 
-        # np.save("trajectories1", np.array(trajectories1))
-        # np.save("trajectories2", np.array(trajectories2))
-        # np.save("grids1", np.array(grids_1))
-        # np.save("grids2", np.array(grids_2))
-        # np.save("labels", np.array(labels))
-        # print("Not equal samples: ", wrongs)
+        np.save("trajectories1_pred" + str(self.pred_T), np.array(trajectories1))
+        np.save("trajectories2_pred" + str(self.pred_T), np.array(trajectories2))
+        np.save("grids1_pred" + str(self.pred_T), np.array(grids_1))
+        np.save("grids2_pred" + str(self.pred_T), np.array(grids_2))
+        np.save("labels_pred" + str(self.pred_T), np.array(labels))
+        print("Not equal samples: ", wrongs)
 
 
 if __name__ == "__main__":
