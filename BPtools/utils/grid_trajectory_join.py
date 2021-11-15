@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 class DataProcess:
     def __init__(self,
                  path,
-                 pred_T=10,
+                 pred_T=15,
                  delta_T1=60,
                  delta_T2=None,
                  grid_dT=1,
@@ -221,11 +221,11 @@ class DataProcess:
 
 
 if __name__ == "__main__":
-    # data = DataProcess(path='D:/dataset/', grid_dT=1)
-    data = DataProcess(path='../../../dataset')
+    data = DataProcess(path='D:/dataset/', grid_dT=1)
+    # data = DataProcess(path='../../../dataset')
     # print(data.path_grids, data.path_trajs)
     data.build_dataset()
-    labels = np.load("labels.npy")
+    labels = np.load("labels_pred15.npy")
     print("keep", np.sum(np.prod((labels==np.array([0,1,0])), axis=1)))
     print("left", np.sum(np.prod((labels==np.array([1,0,0])), axis=1)))
     print("right", np.sum(np.prod((labels==np.array([0,0,1])), axis=1)))
